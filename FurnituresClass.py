@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-
 class Furniture(ABC):
     def __init__(self, name: str, description: str, price: float, dimensions: tuple, color: str):
         self.name = name
