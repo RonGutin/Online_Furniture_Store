@@ -10,7 +10,6 @@ def main():
         dimensions=(200, 100, 75),
         color="Brown",
         material="Oak Wood",
-        available_colors=["Brown", "Black", "White"]
     )
 
     gaming_chair = GamingChair(
@@ -19,10 +18,8 @@ def main():
         price=150.00,
         dimensions=(50, 50, 120),
         color="Red",
-        material="Leather",
         is_adjustable=True,
         has_armrest=True,
-        available_colors=["Red", "Blue", "Black"]
     )
     
     def seed_coupons():
@@ -68,11 +65,11 @@ def main():
     print(f"${cart.get_total_price():.2f}")
 
     print("\n=== Applying coupons ===")
-    try:
-        final_price = cart.apply_discount("SAVE20")
-        print(f"Price after applying SAVE20 coupon: ${final_price:.2f}")
-    except ValueError as e:
-        print(e)
+    # try:
+    #     final_price = cart.apply_discount("SAVE20")
+    #     print(f"Price after applying SAVE20 coupon: ${final_price:.2f}")
+    # except ValueError as e:
+    #     print(e)
 
 
     print("\n=== Removing an item ===")

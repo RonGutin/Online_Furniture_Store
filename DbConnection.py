@@ -28,6 +28,9 @@ try:
 except Exception as e:
     print(f"Error connecting to DB or applying discount:: {e}")
 
+
+
+
 class CouponsCodes(Base):
     __tablename__ = "CouponsCodes"
     idCouponsCodes = Column(Integer, primary_key=True, index=True)
