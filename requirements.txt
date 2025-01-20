@@ -8,5 +8,6 @@ black
 requests
 numpy
 
+api
 sqlalchemy
-##
+
