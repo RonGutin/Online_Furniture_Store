@@ -5,8 +5,8 @@ class Furniture(ABC):
     def __init__(self, name: str, description: str, price: float, dimensions: tuple, color: str):
         if price < 0:
             raise ValueError("Price cannot be negative.")
-        for num in numbers:
-            if num < 0:
+        for d in dimensions:
+            if d < 0:
                 raise ValueError(f"Length cannot be negative.")
         self.name = name
         self.description = description
