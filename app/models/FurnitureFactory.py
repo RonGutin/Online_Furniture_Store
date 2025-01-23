@@ -1,5 +1,5 @@
-from EnumsClass import FurnitureType  # Import FurnitureType from the enums module
-from FurnituresClass import DiningTable, WorkDesk, CoffeeTable, WorkChair, GamingChair
+from app.models.EnumsClass import FurnitureType  # Import FurnitureType from the enums module
+from app.models.FurnituresClass import DiningTable, WorkDesk, CoffeeTable, WorkChair, GamingChair
 
 
 class FurnitureFactory:
