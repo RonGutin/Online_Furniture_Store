@@ -15,7 +15,7 @@ def main():
     gaming_chair = GamingChair(
         name="Pro Gamer Chair",
         description="An ergonomic gaming chair with adjustable height and armrests.",
-        price=150.00,
+        price=175.00,
         dimensions=(50, 50, 120),
         color="Red",
         is_adjustable=True,
