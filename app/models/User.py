@@ -3,8 +3,9 @@ from sqlalchemy.orm import relationship
 import re
 from typing import Optional, List
 from datetime import datetime
-from ShoppingCart import ShoppingCart
-from DbConnection import Base, SessionLocal
+from app.models.ShoppingCart import ShoppingCart
+from app.data.DbConnection import Base, SessionLocal
+
 
 
 class UserDB(Base):

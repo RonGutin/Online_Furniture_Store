@@ -1,5 +1,5 @@
 from flask import Flask
-from api.endpoints import register_endpoints, api_blueprint
+from app.api.endpoints import register_endpoints, api_blueprint
 
 def create_app():
     app = Flask(__name__)
