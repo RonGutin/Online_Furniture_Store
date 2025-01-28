@@ -1,4 +1,4 @@
-from DbConnection import SessionLocal, CouponsCodes
+from app.data.DbConnection import SessionLocal, CouponsCodes
 
 
 class ShoppingCart:

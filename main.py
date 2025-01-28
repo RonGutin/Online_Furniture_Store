@@ -1,6 +1,6 @@
-from DbConnection import SessionLocal, CouponsCodes
-from FurnituresClass import DiningTable, GamingChair
-from ShoppingCart import ShoppingCart
+from app.data.DbConnection import SessionLocal, CouponsCodes
+from app.models.FurnituresClass import DiningTable, GamingChair
+from app.models.ShoppingCart import ShoppingCart
 ############### important - this file is temporary untill we will build a real main file
 def main():
     dining_table = DiningTable(
@@ -15,7 +15,7 @@ def main():
     gaming_chair = GamingChair(
         name="Pro Gamer Chair",
         description="An ergonomic gaming chair with adjustable height and armrests.",
-        price=150.00,
+        price=175.00,
         dimensions=(50, 50, 120),
         color="Red",
         is_adjustable=True,
