@@ -4,22 +4,7 @@ import re
 from typing import Optional, List
 from datetime import datetime
 from app.models.ShoppingCart import ShoppingCart
-from app.data.DbConnection import Base, SessionLocal
-
-
-
-class UserDB(Base):
-    """SQLAlchemy model for User table"""
-    __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)  # Will store the hashed password from Authentication || need to think if it should be here or not (security)
-    address = Column(String(255), nullable=False)
-    credit = Column(Float, default=0.0)
-    type = Column(String(50))  # For user/manager discrimination
-
+from app.data.DbConnection import SessionLocal, UserDB
 
 class User:
     """

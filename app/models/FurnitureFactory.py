@@ -20,20 +20,18 @@ class FurnitureFactory:
         except KeyError:
             raise ValueError(f"Unknown furniture type: {furniture_type}")
 
-        match enum_type.value:
-            case 1:  # DINING_TABLE
-                return DiningTable(**kwargs)
-            case 2:  # WORK_DESK
-                return WorkDesk(**kwargs)
-            case 3:  # COFFEE_TABLE
-                return CoffeeTable(**kwargs)
-            case 4:  # WORK_CHAIR
-                return WorkChair(**kwargs)
-            case 5:  # GAMING_CHAIR
-                return GamingChair(**kwargs)
-            case _:
-                raise ValueError(f"Unknown furniture type value: {enum_type.value}")
-
+        if enum_type.value == 1:  # DINING_TABLE
+            return DiningTable(**kwargs)
+        elif enum_type.value == 2:  # WORK_DESK
+            return WorkDesk(**kwargs)
+        elif enum_type.value == 3:  # COFFEE_TABLE
+            return CoffeeTable(**kwargs)
+        elif enum_type.value == 4:  # WORK_CHAIR
+            return WorkChair(**kwargs)
+        elif enum_type.value == 5:  # GAMING_CHAIR
+            return GamingChair(**kwargs)
+        else:
+            raise ValueError(f"Unknown furniture type value: {enum_type.value}")
 
 # Example usage
 factory = FurnitureFactory()
