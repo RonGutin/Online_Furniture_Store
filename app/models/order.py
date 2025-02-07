@@ -33,5 +33,5 @@ class Order:
         return OrderStatus.(self.status).name
         
     def __repr__(self) -> str:
-        return (f"Order(id={self.id}, User email = {self.user_mail}, "
+        return (f"Order(id = {self.id}, User email = {self.user_mail}, "
                 f"Total price = {self.total_price:.2f}$, Status = {OrderStatus(self.status).name})")
