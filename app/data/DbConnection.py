@@ -2,7 +2,7 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.sql import text
-from sqlalchemy import Column, Integer, String, Float, Boolean, CheckConstraint
+from sqlalchemy import Column, Integer, String, Float, Boolean, CheckConstraint, PrimaryKeyConstraint
 
 DATABASE_USERNAME = "root"
 DATABASE_PASSWORD = "HaHa12345!"
@@ -77,4 +77,19 @@ class ManagerDB(Base):
     __tablename__ = "Managers"
     email = Column(String(100), primary_key=True, index=True)
 
+class OrdersDB(Base):
+    """SQLAlchemy model for Orders table"""
+    __tablename__ = "Orders"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    Ostatus = Column(Integer, nullable=False)
+    UserEmail = Column(String(100), nullable=False)
+    idCouponsCodes = Column(Integer, nullable=True)
+
+class OrderContainsItemDB(Base):
+    """SQLAlchemy model for Order Contains Item table"""
+    __tablename__ = "OrderContainsItem"
+    OrderID = Column(Integer, nullable=False)
+    ItemID = Column(Integer, nullable=False)
+    Amount = Column(Integer, nullable=False)
+    __table_args__ = PrimaryKeyConstraint("ItemID", "OrderID")  # Composite Primary Key
     
