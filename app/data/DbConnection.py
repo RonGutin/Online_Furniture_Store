@@ -33,7 +33,6 @@ class CouponsCodes(Base):
     CouponValue = Column(String(48), unique=True, nullable=False)
     Discount = Column(Integer, nullable=False)
 
-
 class InventoryDB(Base):
     __tablename__ = 'Inventory'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -48,7 +47,7 @@ class InventoryDB(Base):
     is_adjustable = Column(Boolean, nullable=False, default=False)
     has_armrest = Column(Boolean, nullable=False, default=False)
     material = Column(String(50), nullable=False)
-    quntity = Column(Integer, nullable=False, default=0)
+    quantity = Column(Integer, nullable=False, default=0)
 
     __table_args__ = (
         CheckConstraint(
@@ -57,22 +56,19 @@ class InventoryDB(Base):
         ),
     )
 
-
 class BasicUserDB(Base):
     """SQLAlchemy model for BasicUser table"""
     __tablename__ = "BasicUser"
 
     email = Column(String(100), primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    password = Column(String(255), nullable=False)
+    Uname = Column(String(100), nullable=False)
+    Upassword = Column(String(255), nullable=False)
 
 class UserDB(Base):
     """SQLAlchemy model for User table"""
     __tablename__ = "Users"
     
     email = Column(String(100), primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    password = Column(String(255), nullable=False)  
     address = Column(String(255), nullable=False)
     credit = Column(Float, default=0.0)
 
@@ -80,5 +76,5 @@ class ManagerDB(Base):
     """SQLAlchemy model for Manager table"""
     __tablename__ = "Managers"
     email = Column(String(100), primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    password = Column(String(255), nullable=False)
+
+    

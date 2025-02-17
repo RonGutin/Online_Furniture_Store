@@ -17,7 +17,7 @@ def register_endpoints(app):
 
 
 @api_blueprint.route('/update_quntity', methods=['GET'])
-def update_quntity():
+def update_quantity():
     try: # get info from url request
         furniture_type = request.args.get('furniture_type', type=int) 
         color = request.args.get('color', type=str)

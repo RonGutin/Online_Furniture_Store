@@ -40,24 +40,24 @@ class Inventory:
             session.close()
             return ans 
 
-    def update_quntity(self, indx, action, quantity):
-        succsuss = True
+    def update_quantity(self, indx, action, quantity):
+        success = True
         try:
             with SessionLocal() as session:
                 row = session.query(InventoryDB).filter_by(id=indx).first()
                 if row:
                     if action:
-                        row.quntity = max(row.quntity - quantity ,0)
+                        row.quantity = max(row.quantity - quantity ,0)
                     else:
-                        row.quntity += quantity
+                        row.quantity += quantity
                 else:
                     succsuss = False
         except Exception as e:
-            succsuss = False
+            success = False
             print(f"Error fetching data: {e}")
         finally:
             session.close()
-            return succsuss
+            return success
 
     def get_information_by_query(self, column, column_value): #coulmn = f_type, coulmn_value= Chair
         ans = None

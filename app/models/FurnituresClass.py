@@ -160,7 +160,7 @@ class GamingChair(Chair):
 class WorkChair(Chair):
     def __init__(self, name: str, description: str, price: float, dimensions: tuple, color: str, is_adjustable: bool, has_armrest: bool):
         super().__init__(name, description, price, dimensions, color, is_adjustable, has_armrest)
-        self.available_colors = ["Black", "Red", "White"]
+        self.available_colors = ["Red", "White"]
 
     def check_availability(self) -> bool:
         """Check if the work chair is in stock."""
