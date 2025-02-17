@@ -18,7 +18,7 @@ class ShoppingCart:
                 raise ValueError("Invalid coupon code")
             total_price = self.get_total_price()
             discount_amount = total_price * (coupon.Discount / 100)
-            return total_price - discount_amount
+            return (total_price - discount_amount),coupon.idCouponsCodes
         except Exception as ex:
             print(f"While coneccting to DB: {ex}")
         finally:
