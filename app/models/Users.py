@@ -6,7 +6,8 @@ from typing import Optional, List
 from datetime import datetime
 from app.models.ShoppingCart import ShoppingCart
 from app.data.DbConnection import SessionLocal, UserDB , BasicUserDB , ManagerDB
-from app.models.Authentication import set_new_password
+from app.models.Authentication import Authentication
+
 
 
 
@@ -38,7 +39,7 @@ class BasicUser(ABC):
         if not re.match(email_pattern, email):
             raise ValueError("Invalid email format")
         return email.lower()
-
+    
     @abstractmethod
     def set_password(self) -> None:
         pass
@@ -85,11 +86,9 @@ class User(BasicUser):
 
             if address is not None:
                 user_db.address = address
-                basic_user_db.address = address
                 self.address = address
             if name is not None:
-                user_db.name = name
-                basic_user_db.name = name
+                basic_user_db.Uname = name
                 self.name = name
 
             session.commit()
@@ -129,7 +128,7 @@ class User(BasicUser):
         return self.orders
     
     def set_password(self, new_password: str) -> None:
-        set_new_password(self,new_password)
+        Authentication.set_new_password(self,new_password)
         return
 
     def checkout(self) -> bool:
@@ -154,13 +153,17 @@ class Manager(BasicUser):
         return f"Manager: Name = {self.name}, Email = {self.email}"
     
     def delete_user(self, email) -> None:
-        """Delete user from database."""
+        """Delete user from databases."""
         session = SessionLocal()
         try:
             user_db = session.query(UserDB).filter(UserDB.email == email).first()
+            basic_user_db = session.query(BasicUserDB).filter(BasicUserDB.email == email).first()
             if user_db:
                 session.delete(user_db)
-                session.commit()
+            if basic_user_db: 
+                session.delete(basic_user_db)
+
+            session.commit()
         except Exception as e:
             session.rollback()
             raise Exception(f"Error deleting user: {e}")
@@ -168,26 +171,12 @@ class Manager(BasicUser):
             session.close()
             
     def set_password(self, new_password: str) -> None:
-        set_new_password(self,new_password)
+        Authentication.set_new_password(self,new_password)
         return  
     
-    def add_manager(self, name: str, email: str, password: str) -> None:    
-        """Add new manager to database."""
-        session = SessionLocal()
-        try:    
-            new_manager = ManagerDB(
-                name=name,
-                email=self._validate_email(email),
-                password=password
-            )
-            session.add(new_manager)
-            session.commit()
-            # add creation of new manager instance through authentication class
-        except Exception as e:
-            session.rollback()
-            raise Exception(f"Error adding manager: {e}")
-        finally:
-            session.close()
+    def add_manager(self, name: str, email: str, password: str) -> "Manager":    
+        return Authentication.create_manager(name, email, password)
+
             
     def update_inventory(self):
         pass

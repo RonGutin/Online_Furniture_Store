@@ -37,9 +37,7 @@ class Authentication:
             )
 
             user_db = UserDB(
-                name=name,
                 email=email,
-                password=hashed_password,
                 address=address,
                 credit=credit
             )
@@ -73,11 +71,8 @@ class Authentication:
                 password=hashed_password
             )
 
-            manager_db = ManagerDB(
-                name=name,
-                email=email,
-                password=hashed_password
-            )
+            manager_db = ManagerDB(email=email)
+            
             session.add(basic_manager_db)
             session.add(manager_db)
             session.commit()
@@ -94,9 +89,10 @@ class Authentication:
     def sign_in(self, email: str, password: str) -> Union[User, Manager, None]:
         session = SessionLocal()
         try:
+            basic_user = session.query(BasicUserDB).filter(BasicUserDB.email == email).first()
             user = session.query(UserDB).filter(UserDB.email == email).first()
-            if user and self.validateAuth(password, user.password):
-                return User(user.name, user.email, user.password, user.address, user.credit)
+            if user and self.validate_auth(password, basic_user.password):
+                return User(basic_user.Uname, user.email, basic_user.Upassword, user.address, user.credit)
             
             manager = session.query(ManagerDB).filter(ManagerDB.email == email).first()
             if manager and self.validateAuth(password, manager.password):
@@ -104,6 +100,13 @@ class Authentication:
             
             print("Invalid credentials or user/manager does not exist")
             return None
+
+        except Exception as e:
+            session.rollback()
+            print(f"Error during login: {e}")
+            return None  
+            
+            
             
         finally:
             session.close()
@@ -117,14 +120,7 @@ class Authentication:
                 raise ValueError("User/Manager not found in database")
 
             hashed_password = self._hash_password(new_password)
-            basic_user_db.password = hashed_password
-
-            user_db = session.query(UserDB).filter(UserDB.email == curr_basic_user.email).first()
-            manager_db = session.query(ManagerDB).filter(ManagerDB.email == curr_basic_user.email).first()
-            if user_db:
-                user_db.password = hashed_password
-            else:
-                manager_db.password = hashed_password
+            basic_user_db.Upassword = hashed_password
 
             session.commit()
             print(f'Password successfully changed for:\n{curr_basic_user}')
