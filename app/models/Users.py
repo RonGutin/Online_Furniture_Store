@@ -5,13 +5,14 @@ import re
 from typing import Optional, List
 from datetime import datetime
 from app.models.ShoppingCart import ShoppingCart
-from app.data.DbConnection import SessionLocal, UserDB
+from app.data.DbConnection import SessionLocal, UserDB , BasicUserDB , ManagerDB
+from app.models.Authentication import set_new_password
 
 
 
 class BasicUser(ABC):
     
-    def __init__(self, name: str, email: str, password: str, address: str, credit :float = 0):
+    def __init__(self, name: str, email: str, password: str):
             """
             Initialize a new User instance.
             Note: This should only be called by the Authentication class.
@@ -39,10 +40,13 @@ class BasicUser(ABC):
         return email.lower()
 
     @abstractmethod
+    def set_password(self) -> None:
+        pass
+
+    @abstractmethod
     def __repr__(self):
         pass
     
-
 class User(BasicUser):
     """
         User class for managing user authentication and profile information in the furniture store.
@@ -68,7 +72,6 @@ class User(BasicUser):
         self.cart = ShoppingCart(self) 
         self.orders = []
 
-
     def update_user_details(self, address: Optional[str] = None, name: Optional[str] = None) -> None:
         """Update user profile information."""
         if (address is None and name is None): return
@@ -77,12 +80,16 @@ class User(BasicUser):
             user_db = session.query(UserDB).filter(UserDB.email == self.email).first()
             if not user_db:
                 raise ValueError("User not found in database")
+            
+            basic_user_db = session.query(BasicUserDB).filter(BasicUserDB.email == self.email).first() # no check beacause if exists in UserDB -> exists in BasicUserDB
 
             if address is not None:
                 user_db.address = address
+                basic_user_db.address = address
                 self.address = address
             if name is not None:
                 user_db.name = name
+                basic_user_db.name = name
                 self.name = name
 
             session.commit()
@@ -121,23 +128,9 @@ class User(BasicUser):
         """
         return self.orders
     
-    # def set_new_password(self, new_password: str) -> None:
-        # """Update user's password."""
-        # session = SessionLocal()
-        # try:
-        #     user_db = session.query(UserDB).filter(UserDB.email == self.email).first()
-        #     if not user_db:
-        #         raise ValueError("User not found in database")
-
-        #     hashed_password = self._hash_password(new_password)
-        #     user_db.password = hashed_password
-        #     self.password = hashed_password
-        #     session.commit()
-        # except Exception as e:
-        #     session.rollback()
-        #     raise Exception(f"Error updating password: {e}")
-        # finally:
-        #     session.close()
+    def set_password(self, new_password: str) -> None:
+        set_new_password(self,new_password)
+        return
 
     def checkout(self) -> bool:
         #needs implementation of Order class
@@ -145,7 +138,7 @@ class User(BasicUser):
         
     def __repr__(self) -> str:
         """String representation of the User object."""
-        return f"User(Name ={self.name}, Email={self.email}, Address={self.address}, Credit={self.credit})"
+        return f"User: Name ={self.name}, Email={self.email}, Address={self.address}, Credit={self.credit}"
     
 class Manager(BasicUser):
     
@@ -157,8 +150,8 @@ class Manager(BasicUser):
         super().__init__(name, email, password)
         
     def __repr__(self) -> str:
-        """String representation of the User object."""
-        return f"Manager info: Name = {self.name}, Email = {self.email}"
+        """String representation of the Manager object."""
+        return f"Manager: Name = {self.name}, Email = {self.email}"
     
     def delete_user(self, email) -> None:
         """Delete user from database."""
@@ -174,14 +167,30 @@ class Manager(BasicUser):
         finally:
             session.close()
             
+    def set_password(self, new_password: str) -> None:
+        set_new_password(self,new_password)
+        return  
+    
+    def add_manager(self, name: str, email: str, password: str) -> None:    
+        """Add new manager to database."""
+        session = SessionLocal()
+        try:    
+            new_manager = ManagerDB(
+                name=name,
+                email=self._validate_email(email),
+                password=password
+            )
+            session.add(new_manager)
+            session.commit()
+            # add creation of new manager instance through authentication class
+        except Exception as e:
+            session.rollback()
+            raise Exception(f"Error adding manager: {e}")
+        finally:
+            session.close()
+            
     def update_inventory(self):
         pass
     
-    
     def get_all_orders(self):
-        pass
-    
-    
-    def add_manager(self, name: str, email: str, password: str):
-        pass
-    
+        pass        

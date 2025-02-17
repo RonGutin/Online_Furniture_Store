@@ -57,14 +57,28 @@ class InventoryDB(Base):
         ),
     )
 
+
+class BasicUserDB(Base):
+    """SQLAlchemy model for BasicUser table"""
+    __tablename__ = "BasicUser"
+
+    email = Column(String(100), primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    password = Column(String(255), nullable=False)
+
 class UserDB(Base):
     """SQLAlchemy model for User table"""
-    __tablename__ = "users"
+    __tablename__ = "Users"
     
-    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(100), primary_key=True, index=True)
     name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)  # Will store the hashed password from Authentication || need to think if it should be here or not (security)
+    password = Column(String(255), nullable=False)  
     address = Column(String(255), nullable=False)
     credit = Column(Float, default=0.0)
-    type = Column(String(50))  # For user/manager discrimination
+
+class ManagerDB(Base):
+    """SQLAlchemy model for Manager table"""
+    __tablename__ = "Managers"
+    email = Column(String(100), primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    password = Column(String(255), nullable=False)
