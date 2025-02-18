@@ -33,27 +33,4 @@ class FurnitureFactory:
         else:
             raise ValueError(f"Unknown furniture type value: {enum_type.value}")
 
-# Example usage
-factory = FurnitureFactory()
-dining_table = factory.create_furniture(
-    "dining_table",
-    name="Modern Dining Table",
-    description="A sleek dining table for modern homes.",
-    price=500.0,
-    dimensions=(200, 100, 75),
-    color="Brown",
-    material="glass",
-)
-gaming_chair = factory.create_furniture(
-    "GAMING_CHAIR",
-    name="new gaiming chair",
-    description="the best chair in the world!!!!!",
-    price=65,
-    dimensions=(75, 10, 57),
-    color="Black",
-    is_adjustable=False,
-    has_armrest=True,
-)
-print(dining_table)
-print("")
-print(gaming_chair)
+
