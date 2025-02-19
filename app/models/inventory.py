@@ -1,5 +1,9 @@
 from cmath import inf
 from flask import jsonify
+from typing import Optional, Union
+from app.utils import transform_pascal_to_snake
+from app.models.EnumsClass import FurnitureType
+from app.models.FurnituresClass import Chair, Table
 from app.data.DbConnection import SessionLocal, InventoryDB
 from sqlalchemy import and_
 
@@ -11,53 +15,81 @@ class Inventory:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def get_indx_furniture_by_values(self, furniture_type, color, high, depth, width, is_adjustable, has_armrest, material):
-        try:
-            ans = None
-            with SessionLocal() as session:
-                try:
-                    result = self.session.query(InventoryDB.id).filter(
-                            and_(
-                                InventoryDB.furniture_type == furniture_type,
-                                InventoryDB.color == color,
-                                InventoryDB.high == high,
-                                InventoryDB.depth == depth,
-                                InventoryDB.width == width,
-                                InventoryDB.is_adjustable == is_adjustable,
-                                InventoryDB.has_armrest == has_armrest,
-                                InventoryDB.material == material
-                            )
-                        ).first()
-                        # Return the ID if a match is found
-                    if result:
-                        ans = result[0]
-                except Exception as e:
-                    print(f"Error fetching data: {e}")
-                    ans = -1 # there is not furniture with those params 
-        except Exception as ex:
-            print(f"DB connection error: {ex}")
-        finally:
-            session.close()
-            return ans 
+    def get_index_furniture_by_values(self, item: Optional[Union[Chair, Table]]) -> Optional[int]:
+        """
+        Retrieves the index (ID) of a furniture item in InventoryDB based on its attributes.
+        Returns:
+            - The ID if found.
+            - None if no match exists.
+        """
+        if item is None:
+            print("Error: item is None")
+            return None
 
-    def update_quantity(self, indx, action, quantity):
-        success = True
         try:
+            furniture_type = transform_pascal_to_snake(item.__class__.__name__)
+
             with SessionLocal() as session:
-                row = session.query(InventoryDB).filter_by(id=indx).first()
-                if row:
-                    if action:
-                        row.quantity = max(row.quantity - quantity ,0)
-                    else:
-                        row.quantity += quantity
-                else:
-                    succsuss = False
+                filters = [
+                    InventoryDB.furniture_type == furniture_type,
+                    InventoryDB.color == item.color,
+                    InventoryDB.high == item.dimensions[0], 
+                    InventoryDB.depth == item.dimensions[1],
+                    InventoryDB.width == item.dimensions[2]
+                ]
+
+                # Add optional attributes only if they exist
+                if hasattr(item, "is_adjustable"):
+                    filters.append(InventoryDB.is_adjustable == item.is_adjustable)
+                if hasattr(item, "has_armrest"):
+                    filters.append(InventoryDB.has_armrest == item.has_armrest)
+                if hasattr(item, "material"):
+                    filters.append(InventoryDB.material == item.material)
+
+                result = session.query(InventoryDB.id).filter(and_(*filters)).first()
+
+                return result[0] if result else None
+
         except Exception as e:
-            success = False
             print(f"Error fetching data: {e}")
+            return None
+
+    def update_amount_in_inventory(self, item: Union[Chair, Table], quantity: int, sign: bool) -> None:
+        """
+        Determines the furniture type and updates its quantity in inventory.
+        """
+        if item is None:
+            print("Error: No item provided.")
+            return
+        furniture_type = transform_pascal_to_snake(item.__class__.__name__)
+        f_type_enum = FurnitureType[furniture_type].value
+        self.update_furniture_amount_in_DB(item, quantity, f_type_enum, sign)
+
+    def update_furniture_amount_in_DB(self, item: Union[Chair, Table], quantity: int, f_type_enum: int, sign: bool) -> None:
+        """
+        Updates quantity field for a specific furniture item (Chair/Table) in the InventoryDB.
+        sign - boolean that points if it is a user making a checkout (sign = 0)
+        or a manager updating inventory (sign = 1)
+        """
+        session = SessionLocal()
+        try:
+            item_id = self.get_index_furniture_by_values(item)
+            invetory_item = session.query(InventoryDB).filter(InventoryDB.id == item_id).first()
+
+            if invetory_item:
+                if sign:
+                    invetory_item.quantity += quantity
+                else: invetory_item.quantity -= quantity
+
+                session.commit()
+            else:
+                raise ValueError(f"Item: {item} not found in inventory.")
+
+        except Exception as e:
+            session.rollback()
+            print(f"Error in updating furniture quantity in DB: {e}")
         finally:
             session.close()
-            return success
 
     def get_information_by_query(self, column, column_value): #coulmn = f_type, coulmn_value= Chair
         ans = None

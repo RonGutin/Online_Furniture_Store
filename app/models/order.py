@@ -3,6 +3,7 @@ from EnumsClass import OrderStatus, FurnitureType
 from ShoppingCart import ShoppingCart
 from app.data.DbConnection import SessionLocal, OrdersDB, OrderContainsItemDB , InventoryDB
 from typing import Optional
+from app.models.inventory import Inventory
 
 class Order:
     """Manages order details and status for the furniture store"""
@@ -26,23 +27,15 @@ class Order:
             session.commit()
             session.refresh(orders_db) 
             self.id = orders_db.id 
-
+            inv = Inventory()
             for item, amount in cart.items:
                 order_contains_item_db = OrderContainsItemDB(
                     Orderid = self.id,
-                    ItemID = session.query(InventoryDB.id).filter(
-                                    and_(
-                                        InventoryDB.furniture_type == f_type_enum,
-                                        InventoryDB.color == item.color,
-                                        InventoryDB.high == item.dimensions[0],
-                                        InventoryDB.depth == item.dimensions[1],
-                                        InventoryDB.width == item.dimensions[2],
-                                        InventoryDB.material == item.material
-                                    )
-                                ).first()
+                    ItemID = inv.get_index_furniture_by_values(item),
+                    Amount = amount
                 )
-
-
+                session.add(order_contains_item_db)
+                
             session.commit()
         except Exception as e:
             session.rollback()

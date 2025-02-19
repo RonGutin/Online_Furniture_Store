@@ -9,8 +9,7 @@ from app.data.DbConnection import SessionLocal, UserDB , BasicUserDB , ManagerDB
 from app.models.Authentication import Authentication
 from app.models.EnumsClass import OrderStatus, FurnitureType
 from app.models.order import Order
-from app.models.FurnituresClass import Furniture,Table,Chair
-from app.utils import transform_pascal_to_snake 
+from app.models.inventory import Inventory
 
 
 
@@ -43,69 +42,6 @@ class BasicUser(ABC):
             raise ValueError("Invalid email format")
         return email.lower()
     
-    def update_chair_amount_in_DB(self, item: Chair, quantity: int,f_type_enum: int, sign: bool) -> None:
-        """
-        Updates quantity field for a specific Chair in the InventoryDB.
-        sign - boolean that points if it is auser making a checkout (sign = 0) 
-        or a manager updating inventory(sign = 1) 
-        """
-        session = SessionLocal()
-        try:
-            invetory_item = session.query(InventoryDB.id).filter(
-                                    and_(
-                                        InventoryDB.furniture_type == f_type_enum,
-                                        InventoryDB.color == item.color,
-                                        InventoryDB.high == item.dimensions[0],
-                                        InventoryDB.depth == item.dimensions[1],
-                                        InventoryDB.width == item.dimensions[2],
-                                        InventoryDB.is_adjustable == item.is_adjustable,
-                                        InventoryDB.has_armrest == item.has_armrest,
-                                    )
-                                ).first()
-            if sign:   
-                invetory_item.quantity += quantity
-            else:
-                invetory_item.quantity -= quantity
-
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            print(f"Error in updating Chair quantity in DB: {e}")
-            return None
-        finally:
-            session.close()  
-
-    def update_table_amount_in_DB(self, item: Table, quantity: int,f_type_enum: int, sign: bool) -> None:
-        """
-        Updates quantity field for a specific Table in the InventoryDB.
-        sign - boolean that points if it is a user is making a checkout (sign = 0) 
-        or a manager updating inventory(sign = 1) 
-        """
-        session = SessionLocal()
-        try:
-            invetory_item = session.query(InventoryDB.id).filter(
-                                    and_(
-                                        InventoryDB.furniture_type == f_type_enum,
-                                        InventoryDB.color == item.color,
-                                        InventoryDB.high == item.dimensions[0],
-                                        InventoryDB.depth == item.dimensions[1],
-                                        InventoryDB.width == item.dimensions[2],
-                                        InventoryDB.material == item.material
-                                    )
-                                ).first()
-            if sign:   
-                invetory_item.quantity += quantity
-            else:
-                invetory_item.quantity -= quantity
-
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            print(f"Error in updating Table quantity in DB: {e}")
-            return None
-        finally:
-            session.close()  
-
     @abstractmethod
     def set_password(self) -> None:
         pass
@@ -136,7 +72,7 @@ class User(BasicUser):
         super().__init__(name, email, password)
         self.address = address
         self.credit = credit
-        self.cart = ShoppingCart(self) 
+        self.cart = ShoppingCart() 
         self.orders = []
 
     def update_user_details(self, address: Optional[str] = None, name: Optional[str] = None) -> None:
@@ -197,19 +133,19 @@ class User(BasicUser):
         Authentication.set_new_password(self,new_password)
         return
 
-    def update_amount_in_inventory(self,item: Furniture, quantity: int, sign: bool) -> None:
-        furniture_type = transform_pascal_to_snake(item.__class__.__name__)
-        f_type_enum = FurnitureType[furniture_type].value
-        if isinstance(item,Table):
-            self.update_table_amount_in_DB(item, quantity,f_type_enum,sign)
-        elif isinstance(item,Chair):
-            self.update_chair_amount_in_DB(item, quantity,f_type_enum,sign)  
-
-    def checkout(self, credit_card_num: int, coupon_code: Optional[int] = None) -> bool:
-        ans = False
-        session = SessionLocal()
+    def checkout(self, credit_card_num: int, coupon_code: Optional[str] = None) -> bool:
         try:
-            if coupon_code: total_price,coupon_id = self.cart.apply_discount(coupon_code)
+            ans = False
+            if self.cart.items:
+                for item, quantity in self.cart.items:
+                    if not item.check_availability(quantity):
+                        raise ValueError(f"There is not enough:{item} in the inventory")
+            else:
+                raise ValueError("There are no items in the cart")
+                    
+            if coupon_code:
+                discount_percent, coupon_id = self.cart.get_coupon_discount_and_id(coupon_code)
+                total_price = self.cart.apply_discount(discount_percent)
             else: total_price = self.cart.get_total_price()    
             
             if self.credit:
@@ -221,8 +157,11 @@ class User(BasicUser):
                     total_price = 0    
                 
             if Authentication.validate_credit_card(total_price,credit_card_num):
+                inv = Inventory()
                 for item,amount in self.cart.items:
-                    self.update_amount_in_inventory(item,amount,sign=False)
+                    if amount < 0 or not isinstance(amount,int):
+                        raise ValueError(f"item {item} has invalid quantity")
+                    inv.update_amount_in_inventory(item,amount,sign=False)
             else:
                 raise ValueError("Invalid Credit Card")
             
@@ -231,10 +170,8 @@ class User(BasicUser):
             ans = True
 
         except Exception as e:
-            session.rollback()
             print(f"Error in checkout Proc: {e}")
-        finally:
-            session.close()        
+        finally:       
             return ans
 
     def __repr__(self) -> str:
