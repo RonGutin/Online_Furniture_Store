@@ -1,30 +1,41 @@
 from app.data.DbConnection import SessionLocal, CouponsCodes
 
-
 class ShoppingCart:
-    def __init__(self, user=None):
-        # param user: None for guest users, or a User object for registered users.
-        self.items = []  # List of furniture objects
-        self.user = user  # None if user is a guest, otherwise User object
-        
-    def get_total_price(self):  # Calculate the total price of all items in the cart return total price as a float.
-        return sum(item.price for item in self.items)
     
-    def apply_discount(self, coupon_code):
+    def __init__(self):
+        self.items = []  # List of items, Each item looks like this: [furniture object, amount] 
+
+
+    def get_total_price(self):  
+        """ Calculate the total price of all items in the cart return total price as a float """
+        return sum(item[0].get_price() * item[1] for item in self.items)
+
+
+    def get_coupon_discount_and_id(self, coupon_code: str) -> Tuple[int, int]:
+        discount = 0
+        id_coupon = -1
         session = SessionLocal()
         try:
             coupon = session.query(CouponsCodes).filter(CouponsCodes.CouponValue == coupon_code).first()
             if not coupon:
                 raise ValueError("Invalid coupon code")
-            total_price = self.get_total_price()
-            discount_amount = total_price * (coupon.Discount / 100)
-            return (total_price - discount_amount),coupon.idCouponsCodes
+            else:
+                discount = coupon.Discount
+                id_coupon = coupon.idCouponsCodes
         except Exception as ex:
-            print(f"While coneccting to DB: {ex}")
+            print(f"While conecting to DB: {ex}")
         finally:
             session.close()
-            
-    def add_item(self, furniture, amount = 1) -> bool:  # Add a furniture item to the shopping cart.
+            return discount, id_coupon
+
+
+    def apply_discount(self, Discount_percentage: int) -> float:
+        """apply discount on shopping cart"""
+        return sum(item[0].calculate_discount(Discount_percentage) * item[1] for item in self.items)
+
+
+    def add_item(self, furniture, amount = 1) -> bool:  
+        """ Add a furniture item to the shopping cart. """
         ans = False
         if amount < 1:
             return ans
@@ -48,7 +59,8 @@ class ShoppingCart:
         return ans
 
 
-    def remove_item(self, furniture):  # Remove a furniture item from the shopping cart.
+    def remove_item(self, furniture): 
+        """ Remove a furniture item from the shopping cart. """
         is_in_items = False
         for item in self.items:
             if item[0] == furniture:
@@ -57,11 +69,12 @@ class ShoppingCart:
         if not is_in_items:
             raise ValueError("Item not in cart - nothing to remove")
 
-    def __repr__(self):  # Return a string representation of the shopping cart.
 
+    def __repr__(self):
+        """Return a string representation of the shopping cart."""
         if not self.items:
-            return "Shopping cart is empty."
-        
-        item_descriptions = [f"{item.name} - ${item.price} | Dimensions: {item.dimensions} | Color: {item.color}\nDescription: {item.description}"
-            for item in self.items]
-        return f"Shopping Cart:\n" + "\n".join(item_descriptions)  # return: String describing the shopping cart contents.
+            return "Shopping cart is empty." 
+        lines = ["Shopping Cart:"]
+        for i, (furniture, amount) in enumerate(self.items, start=1):
+            lines.append(f"{i}. {repr(furniture)}\n   Quantity: {amount}")
+        return "\n".join(lines)
