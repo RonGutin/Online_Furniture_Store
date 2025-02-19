@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, and_
 from sqlalchemy.orm import relationship
 import re 
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 from app.models.ShoppingCart import ShoppingCart
 from app.data.DbConnection import SessionLocal, UserDB , BasicUserDB , ManagerDB , OrdersDB, InventoryDB
@@ -10,6 +10,7 @@ from app.models.Authentication import Authentication
 from app.models.EnumsClass import OrderStatus, FurnitureType
 from app.models.order import Order
 from app.models.inventory import Inventory
+from app.models.FurnituresClass import Chair, Table
 
 
 
@@ -235,8 +236,29 @@ class Manager(BasicUser):
         finally:
             session.close()        
                 
-    def update_inventory(self):
-        pass
+    def update_inventory(self,item: Union[Chair, Table], quantity: int, f_type_enum: int, sign: int) -> None:
+        inv = Inventory()
+        try:
+            if quantity < 0:
+                raise ValueError("Quantity must be non-negative")
+            if sign not in [0, 1]:
+                raise ValueError("❌ Sign must be 1 or 0.") 
+        except Exception as e:
+            raise Exception(f"Error updating Inventory: {e}")
+        inv.update_amount_in_inventory(item, quantity, sign)
+        return
+
     
     def get_all_orders(self):
-        pass        
+        """Retrieve all orders from the database and print them in a structured format."""
+        with SessionLocal() as session:
+            orders = session.query(OrdersDB).all()
+
+            for order in orders:
+                print("=" * 50)
+                print(f"Order ID        : {order.id}")
+                print(f"Status          : {order.Ostatus}")
+                print(f"User Email      : {order.UserEmail}")
+                print(f"Coupon Code ID  : {order.idCouponsCodes if order.idCouponsCodes else 'None'}")
+                print("=" * 50)
+                print()
