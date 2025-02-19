@@ -8,6 +8,7 @@ class Furniture(ABC):
     def __init__(self, color: str):
         self._validate_color(color)  # Checking that the color matches
         self.color = color
+        self.price = None
         
     def _validate_color(self, color):
         """ Checking that the color matches the color options """
@@ -43,6 +44,13 @@ class Furniture(ABC):
         """ Check if the furniture is available in stock. """
         pass
 
+
+    def get_price(self) -> float:
+        """ get the furniture price. """
+        if self.price is None:
+            raise ValueError("Price is not set yet.")
+        return self.price
+
     @abstractmethod
     def __repr__(self) -> str:
         """ Create a customized print for furniture. """
@@ -55,6 +63,7 @@ class Furniture(ABC):
 
 
 class Table(Furniture):
+    
     def __init__(self, color: str, material: str):
         super().__init__(color)
         self._validate_material(material)
@@ -63,6 +72,7 @@ class Table(Furniture):
         self.price = price
         self.name = name
         self.desc = desc 
+
     
     def _get_info_furniture_by_values(self, color, material, f_type):
         """ Finding information about the item from the BD """
