@@ -5,7 +5,7 @@ from sqlalchemy.sql import text
 from sqlalchemy import Column, Integer, String, Float, Boolean, CheckConstraint, PrimaryKeyConstraint
 
 DATABASE_USERNAME = "root"
-DATABASE_PASSWORD = "HaHa12345!"
+DATABASE_PASSWORD = "RAZRAZ123"
 DATABASE_HOST = "localhost"
 DATABASE_PORT = "3306"
 DATABASE_NAME = "FinalProjectDB"
@@ -88,8 +88,7 @@ class OrdersDB(Base):
 class OrderContainsItemDB(Base):
     """SQLAlchemy model for Order Contains Item table"""
     __tablename__ = "OrderContainsItem"
-    OrderID = Column(Integer, nullable=False)
-    ItemID = Column(Integer, nullable=False)
+    OrderID = Column(Integer, primary_key=True, nullable=False)
+    ItemID = Column(Integer, primary_key=True, nullable=False)
     Amount = Column(Integer, nullable=False)
-    __table_args__ = PrimaryKeyConstraint("ItemID", "OrderID")  # Composite Primary Key
     
