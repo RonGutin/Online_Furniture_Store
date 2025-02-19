@@ -9,6 +9,7 @@ class Authentication:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+
         return cls._instance
     
     def _hash_password(self, password: str) -> str:
@@ -131,4 +132,9 @@ class Authentication:
         finally:
             session.close()
 
-        
+    def validate_credit_card(total_price : int,credit_card_num :int ) -> bool:
+        if not total_price:
+            return True
+        if isinstance(credit_card_num,int):
+            return True
+        return False

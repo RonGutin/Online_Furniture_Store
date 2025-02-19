@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, and_
 from sqlalchemy.orm import relationship
 import re 
 from typing import Optional, List
 from datetime import datetime
 from app.models.ShoppingCart import ShoppingCart
-from app.data.DbConnection import SessionLocal, UserDB , BasicUserDB , ManagerDB
+from app.data.DbConnection import SessionLocal, UserDB , BasicUserDB , ManagerDB , OrdersDB, InventoryDB
 from app.models.Authentication import Authentication
-
+from app.models.EnumsClass import OrderStatus, FurnitureType
+from app.models.order import Order
+from app.models.inventory import Inventory
 
 
 
@@ -70,7 +72,7 @@ class User(BasicUser):
         super().__init__(name, email, password)
         self.address = address
         self.credit = credit
-        self.cart = ShoppingCart(self) 
+        self.cart = ShoppingCart() 
         self.orders = []
 
     def update_user_details(self, address: Optional[str] = None, name: Optional[str] = None) -> None:
@@ -131,10 +133,47 @@ class User(BasicUser):
         Authentication.set_new_password(self,new_password)
         return
 
-    def checkout(self) -> bool:
-        #needs implementation of Order class
-        pass
-        
+    def checkout(self, credit_card_num: int, coupon_code: Optional[str] = None) -> bool:
+        try:
+            ans = False
+            if self.cart.items:
+                for item, quantity in self.cart.items:
+                    if not item.check_availability(quantity):
+                        raise ValueError(f"There is not enough:{item} in the inventory")
+            else:
+                raise ValueError("There are no items in the cart")
+                    
+            if coupon_code:
+                discount_percent, coupon_id = self.cart.get_coupon_discount_and_id(coupon_code)
+                total_price = self.cart.apply_discount(discount_percent)
+            else: total_price = self.cart.get_total_price()    
+            
+            if self.credit:
+                if self.credit <= total_price: 
+                    total_price -= self.credit
+                    self.update_credit(self.credit*-1)
+                else:
+                    self.update_credit(total_price*-1)
+                    total_price = 0    
+                
+            if Authentication.validate_credit_card(total_price,credit_card_num):
+                inv = Inventory()
+                for item,amount in self.cart.items:
+                    if amount < 0 or not isinstance(amount,int):
+                        raise ValueError(f"item {item} has invalid quantity")
+                    inv.update_amount_in_inventory(item,amount,sign=False)
+            else:
+                raise ValueError("Invalid Credit Card")
+            
+            new_order = Order(self.email,self.cart,coupon_id)
+            self.orders.append(new_order)
+            ans = True
+
+        except Exception as e:
+            print(f"Error in checkout Proc: {e}")
+        finally:       
+            return ans
+
     def __repr__(self) -> str:
         """String representation of the User object."""
         return f"User: Name ={self.name}, Email={self.email}, Address={self.address}, Credit={self.credit}"
@@ -177,7 +216,25 @@ class Manager(BasicUser):
     def add_manager(self, name: str, email: str, password: str) -> "Manager":    
         return Authentication.create_manager(name, email, password)
 
-            
+    def update_order_status(self, order_id : int) -> None:
+        """
+        Updating order status in Database
+        If already delivered raises an error
+        """
+        session = SessionLocal()
+        try:
+            order_db = session.query(OrdersDB).filter(OrdersDB.id == order_id).first()
+            if order_db.id == OrderStatus.DELIVERED:
+                raise ValueError(f"Order number {order_id} already delivered")
+            else:
+                order_db.Ostatus += 1
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise Exception(f"Error updating Order status: {e}")
+        finally:
+            session.close()        
+                
     def update_inventory(self):
         pass
     
