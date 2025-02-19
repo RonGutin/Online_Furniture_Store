@@ -7,52 +7,97 @@ class TestFurnitureFactory(unittest.TestCase):
         self.factory = FurnitureFactory()
 
     def test_create_dining_table(self):
-        furniture = self.factory.create_furniture("DINING_TABLE", name="Table", description="Wooden table",
-                                                  price=1200.0, dimensions=(120, 80, 75), color="Brown", material="Wood")
-        self.assertIsInstance(furniture, DiningTable)
+        table = self.factory.create_furniture(
+            "DINING_TABLE",
+            color="brown",
+            material="wood"
+        )
+        self.assertIsInstance(table, DiningTable)
+        self.assertEqual(table.color, "brown")
+        self.assertEqual(table.material, "wood")
 
     def test_create_work_desk(self):
-        furniture = self.factory.create_furniture("WORK_DESK", name="Desk", description="Work desk",
-                                                  price=1500.0, dimensions=(150, 75, 70), color="White", material="wood")
-        self.assertIsInstance(furniture, WorkDesk)
+        desk = self.factory.create_furniture(
+            "WORK_DESK",
+            color="white",
+            material="glass"
+        )
+        self.assertIsInstance(desk, WorkDesk)
+        self.assertEqual(desk.color, "white")
+        self.assertEqual(desk.material, "glass")
 
     def test_create_coffee_table(self):
-        furniture = self.factory.create_furniture("COFFEE_TABLE", name="Coffee Table", description="Glass table",
-                                                  price=800.0, dimensions=(90, 60, 45), color="Gray", material="Glass")
-        self.assertIsInstance(furniture, CoffeeTable)
+        coffee_table = self.factory.create_furniture(
+            "COFFEE_TABLE",
+            color="gray",
+            material="plastic"
+        )
+        self.assertIsInstance(coffee_table, CoffeeTable)
+        self.assertEqual(coffee_table.color, "gray")
+        self.assertEqual(coffee_table.material, "plastic")
 
     def test_create_work_chair(self):
-        furniture = self.factory.create_furniture("WORK_CHAIR", name="Work Chair", description="Office chair",
-                                                  price=1000.0, dimensions=(65, 65, 110), color="Red", is_adjustable=True, has_armrest=True)
-        self.assertIsInstance(furniture, WorkChair)
+        work_chair = self.factory.create_furniture(
+            "WORK_CHAIR",
+            color="red",
+            is_adjustable=True,
+            has_armrest=False
+        )
+        self.assertIsInstance(work_chair, WorkChair)
+        self.assertEqual(work_chair.color, "red")
+        self.assertTrue(work_chair.is_adjustable)
+        self.assertFalse(work_chair.has_armrest)
 
     def test_create_gaming_chair(self):
-        furniture = self.factory.create_furniture("GAMING_CHAIR", name="Gaming Chair", description="Ergonomic chair",
-                                                  price=900.0, dimensions=(70, 70, 130), color="Black", is_adjustable=True, has_armrest=True)
-        self.assertIsInstance(furniture, GamingChair)
+        gaming_chair = self.factory.create_furniture(
+            "GAMING_CHAIR",
+            color="black",
+            is_adjustable=True,
+            has_armrest=True
+        )
+        self.assertIsInstance(gaming_chair, GamingChair)
+        self.assertEqual(gaming_chair.color, "black")
+        self.assertTrue(gaming_chair.is_adjustable)
+        self.assertTrue(gaming_chair.has_armrest)
 
     def test_invalid_furniture_type(self):
         with self.assertRaises(ValueError):
-            self.factory.create_furniture("SOFA", name="Sofa", description="Comfy sofa", price=500, dimensions=(200, 80, 90), color="Blue")
+            self.factory.create_furniture(
+                "SOFA",
+                color="brown",
+                material="wood"
+            )
 
-    def test_missing_parameter(self):
+    def test_missing_parameter_for_table(self):
         with self.assertRaises(TypeError):
-            self.factory.create_furniture("DINING_TABLE", name="Table", description="Wooden table", price=1000.0)
+            self.factory.create_furniture(
+                "DINING_TABLE",
+                color="brown"
+            )
 
-    def test_negative_price(self):
-        with self.assertRaises(ValueError):
-            self.factory.create_furniture("COFFEE_TABLE", name="Coffee Table", description="Glass table", price=-100.0,
-                                          dimensions=(90, 60, 45), color="Gray", material="Glass")
-
-    def test_negative_dimensions(self):
-        with self.assertRaises(ValueError):
-            self.factory.create_furniture("WORK_DESK", name="Desk", description="Work desk", price=1500.0,
-                                          dimensions=(-150, 75, 70), color="White", material="Metal")
+    def test_missing_parameter_for_chair(self):
+        with self.assertRaises(TypeError):
+            self.factory.create_furniture(
+                "WORK_CHAIR",
+                color="black",
+                is_adjustable=True
+            )
 
     def test_invalid_color_type(self):
         with self.assertRaises(TypeError):
-            self.factory.create_furniture("GAMING_CHAIR", name="Gaming Chair", description="Ergonomic chair",
-                                          price=900.0, dimensions=(70, 70, 130), color=123, is_adjustable=True, has_armrest=True)
+            self.factory.create_furniture(
+                "COFFEE_TABLE",
+                color=123,
+                material="glass"
+            )
+
+    def test_invalid_material_type(self):
+        with self.assertRaises(TypeError):
+            self.factory.create_furniture(
+                "WORK_DESK",
+                color="black",
+                material=None
+            )
 
 if __name__ == "__main__":
     unittest.main()

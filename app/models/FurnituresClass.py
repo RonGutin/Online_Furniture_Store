@@ -1,7 +1,8 @@
-import re
+from sqlalchemy import and_
 from abc import ABC, abstractmethod
 from app.models.EnumsClass import FurnitureType
-from app.data.DbConnection import SessionLocal
+from app.data.DbConnection import SessionLocal, InventoryDB
+from app.utils import transform_pascal_to_snake
 
 class Furniture(ABC):
     def __init__(self, color: str):
@@ -51,12 +52,6 @@ class Furniture(ABC):
     def _get_info_furniture_by_values(self, *args):
         """ Finding information about the item from the BD """
         pass
-    
-    @staticmethod
-    def transform_pascal_to_snake(text):
-        """ Matching the class name to the enum """
-        text = re.sub(r'([a-z])([A-Z])', r'\1_\2', text) 
-        return text.upper() 
 
 
 class Table(Furniture):
@@ -71,10 +66,11 @@ class Table(Furniture):
     
     def _get_info_furniture_by_values(self, color, material, f_type):
         """ Finding information about the item from the BD """
-        furniture_type = self.transform_pascal_to_snake(f_type)
-        price = None
-        name = None
-        desc = None
+        furniture_type = transform_pascal_to_snake(f_type)
+        furniture_type = FurnitureType[furniture_type].value
+        price = -1
+        name = "None"
+        desc = "None"
         try:
             with SessionLocal() as session:
                 try:
@@ -112,7 +108,7 @@ class Table(Furniture):
         return (
             f"Table Details:\n"
             f"  Name: {self.name}\n"
-            f"  Description: {self.description}\n"
+            f"  Description: {self.desc}\n"
             f"  Price: ${self.price:.2f}\n"
             f"  Dimensions (L x W x H): {self.__class__.dimensions[0]} x {self.__class__.dimensions[1]} x {self.__class__.dimensions[2]} cm\n"
             f"  Material: {self.material}\n"
@@ -125,7 +121,8 @@ class Table(Furniture):
         """ Check if table is in stock. """
         curr_quantity = None
         ans = False
-        furniture_type =self.transform_pascal_to_snake(self.__class__.__name__)
+        furniture_type = transform_pascal_to_snake(self.__class__.__name__)
+        furniture_type = FurnitureType[furniture_type].value
         try:
             with SessionLocal() as session:
                 try:
@@ -137,7 +134,7 @@ class Table(Furniture):
                             )
                         ).first()
                     if curr_quantity:
-                        ans = curr_quantity >= amount                     
+                        ans = curr_quantity[0] >= amount                     
                 except Exception as e:
                     print(f"Error fetching data: {e}")
         except Exception as ex:
@@ -153,6 +150,7 @@ class Table(Furniture):
 
 
 class Chair(Furniture):
+    
     def __init__(self, color: str, is_adjustable: bool, has_armrest: bool):
         super().__init__(color)
         if not isinstance(is_adjustable, bool) or not isinstance(has_armrest, bool):
@@ -166,10 +164,11 @@ class Chair(Furniture):
     
     def _get_info_furniture_by_values(self, color, is_adjustable, has_armrest, f_type):
         """ Finding information about the item from the BD """
-        furniture_type = self.transform_pascal_to_snake(f_type)
-        price = None
-        name = None
-        desc = None
+        furniture_type = transform_pascal_to_snake(f_type)
+        furniture_type = FurnitureType[furniture_type].value
+        price = -1
+        name = "None"
+        desc = "None"
         session = None 
         try:
             session = SessionLocal()
@@ -199,7 +198,8 @@ class Chair(Furniture):
         """ Check if chair is in stock. """
         curr_quantity = None
         ans = False
-        furniture_type =self.transform_pascal_to_snake(self.__class__.__name__)
+        furniture_type = transform_pascal_to_snake(self.__class__.__name__)
+        furniture_type = FurnitureType[furniture_type].value
         try:
             with SessionLocal() as session:
                 try:
@@ -212,7 +212,7 @@ class Chair(Furniture):
                             )
                         ).first()
                     if curr_quantity:
-                        ans = curr_quantity >= amount                     
+                        ans = curr_quantity[0] >= amount                     
                 except Exception as e:
                     print(f"Error fetching data: {e}")
         except Exception as ex:
@@ -249,7 +249,7 @@ class DiningTable(Table):
     available_materials = ["Wood","Metal"]
             
     def __init__(self, color: str, material: str):
-        super().__init__(name, description, price, color, material)
+        super().__init__( color, material)
 
 
     def get_matching_chair(self) -> str:
@@ -264,7 +264,7 @@ class WorkDesk(Table):
     available_materials = ["Wood","Glass"]
     
     def __init__(self, color: str, material: str):
-        super().__init__(name, description, price, color, material)
+        super().__init__(color, material)
 
 
     def get_matching_chair(self) -> str:
@@ -278,8 +278,8 @@ class CoffeeTable(Table):
     available_colors = ["Gray", "Red"]
     available_materials = ["Glass","Plastic"]
             
-    def __init__(self, name: str, description: str, price: float, color: str, material: str):
-        super().__init__(name, description, price, color, material)
+    def __init__(self, color: str, material: str):
+        super().__init__(color, material)
 
 
     def get_matching_chair(self) -> str:
@@ -293,7 +293,7 @@ class GamingChair(Chair):
     available_colors = ["Black", "Blue"]
         
     def __init__(self, color: str, is_adjustable: bool, has_armrest: bool):
-        super().__init__(name, description, price, color, is_adjustable, has_armrest)
+        super().__init__(color, is_adjustable, has_armrest)
 
 
     def get_matching_table(self) -> Table:
@@ -320,5 +320,4 @@ class WorkChair(Chair):
         """
         pass  # To be implemented later based on matching criteria.
 
-temp1 = WorkChair(color="red",is_adjustable= True,has_armrest= False)
-print(temp1)
+
