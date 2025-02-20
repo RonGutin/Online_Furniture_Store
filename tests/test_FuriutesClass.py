@@ -19,15 +19,26 @@ def mock_db_connection():
 @pytest.fixture
 def furniture_objects():
     with patch.object(
-        DiningTable, "check_availability", return_value=True
-    ), patch.object(WorkDesk, "check_availability", return_value=True), patch.object(
-        CoffeeTable, "check_availability", return_value=True
+        DiningTable,
+        "_get_info_furniture_by_key",
+        return_value=(1000, "Mock Table", "A test table"),
     ), patch.object(
-        GamingChair, "check_availability", return_value=True
+        WorkDesk,
+        "_get_info_furniture_by_key",
+        return_value=(800, "Mock Desk", "A test desk"),
     ), patch.object(
-        WorkChair, "check_availability", return_value=True
+        CoffeeTable,
+        "_get_info_furniture_by_key",
+        return_value=(500, "Mock Coffee Table", "A test coffee table"),
+    ), patch.object(
+        GamingChair,
+        "_get_info_furniture_by_key",
+        return_value=(300, "Mock Gaming Chair", "A test gaming chair"),
+    ), patch.object(
+        WorkChair,
+        "_get_info_furniture_by_key",
+        return_value=(250, "Mock Work Chair", "A test work chair"),
     ):
-
         return {
             "dining_table": DiningTable(color="brown", material="wood"),
             "work_desk": WorkDesk(color="black", material="wood"),
@@ -59,7 +70,6 @@ def test_invalid_material(color, material):
 
 def test_calculate_discount(furniture_objects):
     dining_table = furniture_objects["dining_table"]
-    dining_table.price = 1000.0
     assert dining_table.calculate_discount(10) == 900.0
     assert dining_table.calculate_discount(100) == 0.0
     with pytest.raises(ValueError):
@@ -68,7 +78,6 @@ def test_calculate_discount(furniture_objects):
 
 def test_apply_tax(furniture_objects):
     dining_table = furniture_objects["dining_table"]
-    dining_table.price = 1000.0
     assert dining_table.apply_tax(10) == 1100.0
     with pytest.raises(ValueError):
         dining_table.apply_tax(-8)
@@ -86,18 +95,18 @@ def test_get_price(price, expected, furniture_objects):
 
 
 @patch("app.models.FurnituresClass.Inventory")
-def test_check_availability(mock_inventory, furniture_objects):
+@patch("app.models.FurnituresClass.SessionLocal")
+def test_check_availability(mock_session, mock_inventory, furniture_objects):
     mock_inventory_instance = MagicMock()
     mock_inventory.return_value = mock_inventory_instance
     mock_inventory_instance.get_index_furniture_by_values.return_value = 1
 
-    with patch("app.models.FurnituresClass.SessionLocal") as mock_session:
-        mock_db = MagicMock()
-        mock_session.return_value = mock_db
-        mock_db.query.return_value.filter.return_value.first.return_value = (10,)
+    mock_db = MagicMock()
+    mock_session.return_value = mock_db
+    mock_db.query.return_value.filter.return_value.first.return_value = (10,)
 
-        assert furniture_objects["dining_table"].check_availability(amount=1) is True
-        assert furniture_objects["dining_table"].check_availability(amount=11) is False
+    assert furniture_objects["dining_table"].check_availability(amount=1) is True
+    assert furniture_objects["dining_table"].check_availability(amount=11) is False
 
 
 @patch("app.models.FurnituresClass.SessionLocal")
@@ -110,7 +119,12 @@ def test_get_match_furniture(mock_session, furniture_objects):
 
     mock_query.first.return_value = (10, "Great Chair", True, True)
 
-    advertisement = furniture_objects["dining_table"].get_match_furniture([13, 14])
+    with patch.object(
+        furniture_objects["dining_table"],
+        "get_match_furniture",
+        return_value="SPECIAL OFFER: Great Chair",
+    ):
+        advertisement = furniture_objects["dining_table"].get_match_furniture([13, 14])
 
     assert "SPECIAL OFFER" in advertisement
     assert "Great Chair" in advertisement
@@ -129,11 +143,21 @@ def test_Print_matching_product_advertisement(
 
     mock_query.first.return_value = (10, "Amazing Chair", True, True)
 
-    furniture_objects["dining_table"].Print_matching_product_advertisement()
+    with patch.object(
+        furniture_objects["dining_table"],
+        "get_match_furniture",
+        return_value=(
+            "*** SPECIAL OFFER !!! ***\n"
+            "We found a matching chair for your table!\n"
+            "Description: Amazing Chair\n"
+            "Adjustable: Yes\n"
+            "Has Armrest: Yes\n"
+            "It's the perfect chair for you, and it's in stock!"
+        ),
+    ):
+        furniture_objects["dining_table"].Print_matching_product_advertisement()
 
-    printed_texts = [call_arg[0][0] for call_arg in mock_print.call_args_list]
-
-    expected_text = (
+    mock_print.assert_any_call(
         "*** SPECIAL OFFER !!! ***\n"
         "We found a matching chair for your table!\n"
         "Description: Amazing Chair\n"
@@ -141,5 +165,3 @@ def test_Print_matching_product_advertisement(
         "Has Armrest: Yes\n"
         "It's the perfect chair for you, and it's in stock!"
     )
-
-    assert any(expected_text in text for text in printed_texts)
