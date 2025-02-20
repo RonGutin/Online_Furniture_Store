@@ -1,10 +1,12 @@
 from cmath import inf
-from flask import jsonify
 from typing import Optional
+
+from flask import jsonify
+from sqlalchemy import and_
+
 from app.utils import transform_pascal_to_snake
 from app.models.EnumsClass import FurnitureType
 from app.data.DbConnection import SessionLocal, InventoryDB
-from sqlalchemy import and_
 
 
 class Inventory:
@@ -17,7 +19,8 @@ class Inventory:
 
     def get_index_furniture_by_values(self, item) -> Optional[int]:
         """
-        Retrieves the index (ID) of a furniture item in InventoryDB based on its attributes.
+        Retrieves the index (ID) of a furniture item in
+        InventoryDB based on its attributes.
         Returns:
             - The ID if found.
             - None if no match exists.
@@ -112,7 +115,7 @@ class Inventory:
                     if result:
                         json_data = []
                         for row in result:
-                            pass  ################### להשלים את הלולאה לפי השימוש בפונקציה
+                            pass  # !
                         ans = jsonify(json_data)
         except Exception as e:
             print(f"Error fetching data: {e}")
@@ -137,11 +140,11 @@ class Inventory:
                 if result:
                     json_data = []
                     for row in result:
-                        pass  ################### להשלים את הלולאה לפי השימוש בפונקציה
+                        pass  # !
                     ans = jsonify(json_data)
                 else:
                     pass
-                    ############# להחליט מה מחזירים כשהצלחנו לבצע שליפה אבל אין תוצאה מתאימה
+        # !
         except Exception as e:
             print(f"Error fetching data: {e}")
         finally:

@@ -190,7 +190,10 @@ class User(BasicUser):
 
     def __repr__(self) -> str:
         """String representation of the User object."""
-        return f"User: Name ={self.name}, Email={self.email}, Address={self.address}, Credit={self.credit}"
+        return (
+            f"User: Name ={self.name}, Email={self.email}, "
+            f"Address={self.address}, Credit={self.credit}"
+        )
 
 
 class Manager(BasicUser):

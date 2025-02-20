@@ -9,7 +9,7 @@ def hello_world():
     return jsonify({"message": "Hello, Welcome to our shop!"})
 
 
-@api_blueprint.route("/data", methods=["POST"])  ### example - delete  this function
+@api_blueprint.route("/data", methods=["POST"])  # example - delete this function
 def handle_data():
     data = request.get_json()
     return jsonify({"received": data})

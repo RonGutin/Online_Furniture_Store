@@ -2,8 +2,11 @@ from app.data.DbConnection import SessionLocal, CouponsCodes
 from app.models.FurnituresClass import DiningTable, GamingChair
 from app.models.ShoppingCart import ShoppingCart
 
+"""
+Important - this file is temporary until we build a real main file
+"""
 
-############### important - this file is temporary untill we will build a real main file
+
 def main():
     dining_table = DiningTable(
         name="Elegant Dining Table",
@@ -41,7 +44,8 @@ def main():
     print("=== Testing DiningTable ===")
     print(dining_table)
     print(
-        f"Is the table available in stock? {'Yes' if dining_table.check_availability() else 'No'}"
+        f"Is the table available in stock? "
+        f"{'Yes' if dining_table.check_availability() else 'No'}"
     )
     print("=== Prices after discount ===")
     for discount in [0, 10, 50, 100]:
@@ -51,7 +55,8 @@ def main():
     print("\n=== Testing GamingChair ===")
     print(gaming_chair)
     print(
-        f"Is the chair available in stock? {'Yes' if gaming_chair.check_availability() else 'No'}"
+        f"Is the chair available in stock? "
+        f"{'Yes' if gaming_chair.check_availability() else 'No'}"
     )
     print("=== Prices after discount ===")
     for discount in [0, 10, 50, 100]:

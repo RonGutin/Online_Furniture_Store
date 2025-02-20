@@ -24,7 +24,8 @@ class Furniture(ABC):
             allowed = [c.lower() for c in self.__class__.available_colors]
             if color.lower() not in allowed:
                 raise ValueError(
-                    f"Color '{color}' is not allowed. Allowed colors: {', '.join(self.__class__.available_colors)}"
+                    f"Color '{color}' is not allowed. Allowed colors: "
+                    f"{', '.join(self.__class__.available_colors)}"
                 )
 
     def calculate_discount(self, discount_percentage: int) -> float:
@@ -135,7 +136,8 @@ class Table(Furniture):
             allowed = [m.lower() for m in self.__class__.available_materials]
             if material.lower() not in allowed:
                 raise ValueError(
-                    f"Material '{material}' is not allowed. Allowed materials: {', '.join(self.__class__.available_materials)}"
+                    f"Material '{material}' is not allowed. Allowed materials: "
+                    f"{', '.join(self.__class__.available_materials)}"
                 )
 
     def __repr__(self) -> str:
@@ -144,10 +146,13 @@ class Table(Furniture):
             f"  Name: {self.name}\n"
             f"  Description: {self.desc}\n"
             f"  Price: ${self.price:.2f}\n"
-            f"  Dimensions (L x W x H): {self.__class__.dimensions[0]} x {self.__class__.dimensions[1]} x {self.__class__.dimensions[2]} cm\n"
+            f"  Dimensions (L x W x H): "
+            f"{self.__class__.dimensions[0]} x {self.__class__.dimensions[1]} x "
+            f"{self.__class__.dimensions[2]} cm\n"
             f"  Material: {self.material}\n"
             f"  Color: {self.color}\n"
-            f"  Here are several potential color options for this table:: {', '.join(self.available_colors)}\n"
+            f"  Here are several potential color options for this table:: "
+            f"{', '.join(self.available_colors)}\n"
         )
 
     def get_match_furniture(self, Furniture_options: list) -> str:
@@ -224,7 +229,8 @@ class Chair(Furniture):
             f"  Is Adjustable: {'Yes' if self.is_adjustable else 'No'}\n"
             f"  Has Armrest: {'Yes' if self.has_armrest else 'No'}\n"
             f"  Price: ${self.price:.2f}\n"
-            f"  Dimensions: {self.__class__.dimensions[0]} x {self.__class__.dimensions[1]} x {self.__class__.dimensions[2]} cm\n"
+            f"  Dimensions: {self.__class__.dimensions[0]} x "
+            f"{self.__class__.dimensions[1]} x {self.__class__.dimensions[2]} cm\n"
             f"  Color: {self.color}\n"
         )
 
