@@ -26,7 +26,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov black flake8 ruff
+          pip install pytest pytest-cov black flake8 ruff pymysql
 
       - name: Run Black (Code Formatting Check)
         run: black --check .
@@ -35,8 +35,7 @@ jobs:
         run: ruff check .
 
       - name: Run Flake8 (Style Check)
-        run: flake8 --max-line-length=100 .
-
+        run: flake8 --max-line-length=100
 
       - name: Run Tests with Coverage
         run: |
