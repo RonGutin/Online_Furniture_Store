@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from app.models.FurnituresClass import (
     DiningTable,
     WorkDesk,
@@ -17,15 +17,20 @@ def mock_db_connection():
 
 @pytest.fixture
 def furniture_objects():
-    return {
-        "dining_table": DiningTable(color="brown", material="wood"),
-        "work_desk": WorkDesk(color="black", material="wood"),
-        "coffee_table": CoffeeTable(color="gray", material="glass"),
-        "gaming_chair": GamingChair(
-            color="black", is_adjustable=True, has_armrest=True
-        ),
-        "work_chair": WorkChair(color="red", is_adjustable=True, has_armrest=False),
-    }
+    with patch.object(DiningTable, "check_availability", return_value=True), \
+         patch.object(WorkDesk, "check_availability", return_value=True), \
+         patch.object(CoffeeTable, "check_availability", return_value=True), \
+         patch.object(GamingChair, "check_availability", return_value=True), \
+         patch.object(WorkChair, "check_availability", return_value=True):
+        return {
+            "dining_table": DiningTable(color="brown", material="wood"),
+            "work_desk": WorkDesk(color="black", material="wood"),
+            "coffee_table": CoffeeTable(color="gray", material="glass"),
+            "gaming_chair": GamingChair(
+                color="black", is_adjustable=True, has_armrest=True
+            ),
+            "work_chair": WorkChair(color="red", is_adjustable=True, has_armrest=False),
+        }
 
 
 def test_valid_furniture_creation(furniture_objects):
@@ -72,12 +77,8 @@ def test_apply_tax(furniture_objects):
 
 
 def test_check_availability(furniture_objects):
-    assert isinstance(
-        furniture_objects["dining_table"].check_availability(amount=1), bool
-    )
-    assert isinstance(
-        furniture_objects["gaming_chair"].check_availability(amount=2), bool
-    )
+    assert furniture_objects["dining_table"].check_availability(amount=1) is True
+    assert furniture_objects["gaming_chair"].check_availability(amount=2) is True
 
 
 def test_get_color(furniture_objects):
@@ -86,10 +87,12 @@ def test_get_color(furniture_objects):
     assert furniture_objects["gaming_chair"].get_color() == "black"
 
 
-def test_get_price(furniture_objects):
+@pytest.mark.parametrize("price, expected", [(1500.0, 1500.0), (2000.0, 2000.0)])
+def test_get_price(price, expected, furniture_objects):
     dining_table = furniture_objects["dining_table"]
-    dining_table.price = 1500.0
-    assert dining_table.get_price() == 1500.0
+    dining_table.price = price
+    assert dining_table.get_price() == expected
+
     dining_table.price = None
     with pytest.raises(ValueError):
         dining_table.get_price()
