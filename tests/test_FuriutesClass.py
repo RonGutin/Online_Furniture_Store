@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app.models.FurnituresClass import (
     DiningTable,
     WorkDesk,
@@ -17,11 +17,15 @@ def mock_db_connection():
 
 @pytest.fixture
 def furniture_objects():
-    with patch.object(DiningTable, "check_availability", return_value=True), \
-         patch.object(WorkDesk, "check_availability", return_value=True), \
-         patch.object(CoffeeTable, "check_availability", return_value=True), \
-         patch.object(GamingChair, "check_availability", return_value=True), \
-         patch.object(WorkChair, "check_availability", return_value=True):
+    with patch.object(
+        DiningTable, "check_availability", return_value=True
+    ), patch.object(WorkDesk, "check_availability", return_value=True), patch.object(
+        CoffeeTable, "check_availability", return_value=True
+    ), patch.object(
+        GamingChair, "check_availability", return_value=True
+    ), patch.object(
+        WorkChair, "check_availability", return_value=True
+    ):
         return {
             "dining_table": DiningTable(color="brown", material="wood"),
             "work_desk": WorkDesk(color="black", material="wood"),
