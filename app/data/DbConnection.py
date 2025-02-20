@@ -1,4 +1,3 @@
-import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.sql import text
@@ -9,7 +8,6 @@ from sqlalchemy import (
     Float,
     Boolean,
     CheckConstraint,
-    PrimaryKeyConstraint,
 )
 
 DATABASE_USERNAME = "root"

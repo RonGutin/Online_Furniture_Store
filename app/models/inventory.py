@@ -1,6 +1,6 @@
 from cmath import inf
 from flask import jsonify
-from typing import Optional, Union
+from typing import Optional
 from app.utils import transform_pascal_to_snake
 from app.models.EnumsClass import FurnitureType
 from app.data.DbConnection import SessionLocal, InventoryDB

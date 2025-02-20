@@ -1,11 +1,10 @@
 import copy
-from app.models.EnumsClass import OrderStatus, FurnitureType
+from app.models.EnumsClass import OrderStatus
 from app.models.ShoppingCart import ShoppingCart
 from app.data.DbConnection import (
     SessionLocal,
     OrdersDB,
     OrderContainsItemDB,
-    InventoryDB,
 )
 from typing import Optional
 from app.models.inventory import Inventory

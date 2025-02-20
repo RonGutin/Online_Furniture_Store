@@ -3,7 +3,6 @@ import io
 from unittest.mock import patch, MagicMock
 from app.models.ShoppingCart import ShoppingCart
 from app.models.FurnituresClass import DiningTable, GamingChair
-from app.data.DbConnection import CouponsCodes, SessionLocal
 
 
 class TestShoppingCart(unittest.TestCase):

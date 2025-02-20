@@ -1,20 +1,15 @@
 from abc import ABC, abstractmethod
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, and_
-from sqlalchemy.orm import relationship
 import re
 from typing import Optional, List
-from datetime import datetime
 from app.models.ShoppingCart import ShoppingCart
 from app.data.DbConnection import (
     SessionLocal,
     UserDB,
     BasicUserDB,
-    ManagerDB,
     OrdersDB,
-    InventoryDB,
 )
 from app.models.Authentication import Authentication
-from app.models.EnumsClass import OrderStatus, FurnitureType
+from app.models.EnumsClass import OrderStatus
 from app.models.order import Order
 from app.models.inventory import Inventory
 

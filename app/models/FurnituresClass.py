@@ -1,8 +1,5 @@
-from sqlalchemy import and_
 from abc import ABC, abstractmethod
-from app.models.EnumsClass import FurnitureType
 from app.data.DbConnection import SessionLocal, InventoryDB
-from app.utils import transform_pascal_to_snake
 from app.models.inventory import Inventory
 
 
