@@ -2,7 +2,15 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.sql import text
-from sqlalchemy import Column, Integer, String, Float, Boolean, CheckConstraint, PrimaryKeyConstraint
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    Boolean,
+    CheckConstraint,
+    PrimaryKeyConstraint,
+)
 
 DATABASE_USERNAME = "root"
 DATABASE_PASSWORD = "RAZRAZ123"
@@ -33,8 +41,9 @@ class CouponsCodes(Base):
     CouponValue = Column(String(48), unique=True, nullable=False)
     Discount = Column(Integer, nullable=False)
 
+
 class InventoryDB(Base):
-    __tablename__ = 'Inventory'
+    __tablename__ = "Inventory"
     id = Column(Integer, primary_key=True, autoincrement=True)
     furniture_type = Column(Integer, nullable=False)
     color = Column(String(50), nullable=False)
@@ -51,44 +60,52 @@ class InventoryDB(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'furniture_type IN (1, 2, 3, 4, 5)',
-            name='check_furniture_type'
+            "furniture_type IN (1, 2, 3, 4, 5)", name="check_furniture_type"
         ),
     )
 
+
 class BasicUserDB(Base):
     """SQLAlchemy model for BasicUser table"""
+
     __tablename__ = "BasicUser"
 
     email = Column(String(100), primary_key=True, index=True)
     Uname = Column(String(100), nullable=False)
     Upassword = Column(String(255), nullable=False)
 
+
 class UserDB(Base):
     """SQLAlchemy model for User table"""
+
     __tablename__ = "Users"
-    
+
     email = Column(String(100), primary_key=True, index=True)
     address = Column(String(255), nullable=False)
     credit = Column(Float, default=0.0)
 
+
 class ManagerDB(Base):
     """SQLAlchemy model for Manager table"""
+
     __tablename__ = "Managers"
     email = Column(String(100), primary_key=True, index=True)
 
+
 class OrdersDB(Base):
     """SQLAlchemy model for Orders table"""
+
     __tablename__ = "Orders"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     Ostatus = Column(Integer, nullable=False)
     UserEmail = Column(String(100), nullable=False)
     idCouponsCodes = Column(Integer, nullable=True)
 
+
 class OrderContainsItemDB(Base):
     """SQLAlchemy model for Order Contains Item table"""
+
     __tablename__ = "OrderContainsItem"
     OrderID = Column(Integer, primary_key=True, nullable=False)
     ItemID = Column(Integer, primary_key=True, nullable=False)
     Amount = Column(Integer, nullable=False)
-    

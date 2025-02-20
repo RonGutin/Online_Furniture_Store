@@ -4,10 +4,13 @@ flask
 pytest
 pylint
 black
+flake8
+ruff
 
 requests
-numpy
 
 api
 sqlalchemy
+bcrypt
+coverage
 

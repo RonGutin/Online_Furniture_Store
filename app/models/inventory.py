@@ -3,19 +3,19 @@ from flask import jsonify
 from typing import Optional, Union
 from app.utils import transform_pascal_to_snake
 from app.models.EnumsClass import FurnitureType
-from app.models.FurnituresClass import Chair, Table
 from app.data.DbConnection import SessionLocal, InventoryDB
 from sqlalchemy import and_
 
+
 class Inventory:
     _instance = None  # Singleton instance
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def get_index_furniture_by_values(self, item: Optional[Union[Chair, Table]]) -> Optional[int]:
+    def get_index_furniture_by_values(self, item) -> Optional[int]:
         """
         Retrieves the index (ID) of a furniture item in InventoryDB based on its attributes.
         Returns:
@@ -33,9 +33,9 @@ class Inventory:
                 filters = [
                     InventoryDB.furniture_type == furniture_type,
                     InventoryDB.color == item.color,
-                    InventoryDB.high == item.dimensions[0], 
+                    InventoryDB.high == item.dimensions[0],
                     InventoryDB.depth == item.dimensions[1],
-                    InventoryDB.width == item.dimensions[2]
+                    InventoryDB.width == item.dimensions[2],
                 ]
 
                 # Add optional attributes only if they exist
@@ -54,7 +54,7 @@ class Inventory:
             print(f"Error fetching data: {e}")
             return None
 
-    def update_amount_in_inventory(self, item: Union[Chair, Table], quantity: int, sign: bool) -> None:
+    def update_amount_in_inventory(self, item, quantity: int, sign: bool) -> None:
         """
         Determines the furniture type and updates its quantity in inventory.
         """
@@ -65,7 +65,9 @@ class Inventory:
         f_type_enum = FurnitureType[furniture_type].value
         self.update_furniture_amount_in_DB(item, quantity, f_type_enum, sign)
 
-    def update_furniture_amount_in_DB(self, item: Union[Chair, Table], quantity: int, f_type_enum: int, sign: bool) -> None:
+    def update_furniture_amount_in_DB(
+        self, item, quantity: int, f_type_enum: int, sign: bool
+    ) -> None:
         """
         Updates quantity field for a specific furniture item (Chair/Table) in the InventoryDB.
         sign - boolean that points if it is a user making a checkout (sign = 0)
@@ -74,12 +76,15 @@ class Inventory:
         session = SessionLocal()
         try:
             item_id = self.get_index_furniture_by_values(item)
-            invetory_item = session.query(InventoryDB).filter(InventoryDB.id == item_id).first()
+            invetory_item = (
+                session.query(InventoryDB).filter(InventoryDB.id == item_id).first()
+            )
 
             if invetory_item:
                 if sign:
                     invetory_item.quantity += quantity
-                else: invetory_item.quantity -= quantity
+                else:
+                    invetory_item.quantity -= quantity
 
                 session.commit()
             else:
@@ -91,7 +96,9 @@ class Inventory:
         finally:
             session.close()
 
-    def get_information_by_query(self, column, column_value): #coulmn = f_type, coulmn_value= Chair
+    def get_information_by_query(
+        self, column, column_value
+    ):  # coulmn = f_type, coulmn_value= Chair
         ans = None
         try:
             with SessionLocal() as session:
@@ -99,27 +106,38 @@ class Inventory:
                 if col is None:
                     raise ValueError(f"Column '{column}' does not exist in the table.")
                 else:
-                    result = session.query(InventoryDB).filter(col == column_value).all()
+                    result = (
+                        session.query(InventoryDB).filter(col == column_value).all()
+                    )
                     if result:
                         json_data = []
                         for row in result:
-                            pass ################### להשלים את הלולאה לפי השימוש בפונקציה 
+                            pass  ################### להשלים את הלולאה לפי השימוש בפונקציה
                         ans = jsonify(json_data)
         except Exception as e:
             print(f"Error fetching data: {e}")
         finally:
             session.close()
-            return ans 
+            return ans
 
-    def get_information_by_price_range(self, min_price= 0, max_price = inf):
+    def get_information_by_price_range(self, min_price=0, max_price=inf):
         ans = None
         try:
             with SessionLocal() as session:
-                result = session.query(InventoryDB).filter(and_(InventoryDB.price >= min_price, InventoryDB.price <= max_price)).all()
+                result = (
+                    session.query(InventoryDB)
+                    .filter(
+                        and_(
+                            InventoryDB.price >= min_price,
+                            InventoryDB.price <= max_price,
+                        )
+                    )
+                    .all()
+                )
                 if result:
                     json_data = []
                     for row in result:
-                        pass ################### להשלים את הלולאה לפי השימוש בפונקציה 
+                        pass  ################### להשלים את הלולאה לפי השימוש בפונקציה
                     ans = jsonify(json_data)
                 else:
                     pass
@@ -128,4 +146,4 @@ class Inventory:
             print(f"Error fetching data: {e}")
         finally:
             session.close()
-            return ans 
+            return ans
