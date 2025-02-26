@@ -1,7 +1,12 @@
 from app.data.DbConnection import SessionLocal, CouponsCodes
 from app.models.FurnituresClass import DiningTable, GamingChair
 from app.models.ShoppingCart import ShoppingCart
-############### important - this file is temporary untill we will build a real main file
+
+"""
+Important - this file is temporary until we build a real main file
+"""
+
+
 def main():
     dining_table = DiningTable(
         name="Elegant Dining Table",
@@ -21,7 +26,7 @@ def main():
         is_adjustable=True,
         has_armrest=True,
     )
-    
+
     def seed_coupons():
         session = SessionLocal()
         try:
@@ -38,7 +43,10 @@ def main():
 
     print("=== Testing DiningTable ===")
     print(dining_table)
-    print(f"Is the table available in stock? {'Yes' if dining_table.check_availability() else 'No'}")
+    print(
+        f"Is the table available in stock? "
+        f"{'Yes' if dining_table.check_availability() else 'No'}"
+    )
     print("=== Prices after discount ===")
     for discount in [0, 10, 50, 100]:
         print(f"Discount {discount}%: ${dining_table.calculate_discount(discount):.2f}")
@@ -46,7 +54,10 @@ def main():
 
     print("\n=== Testing GamingChair ===")
     print(gaming_chair)
-    print(f"Is the chair available in stock? {'Yes' if gaming_chair.check_availability() else 'No'}")
+    print(
+        f"Is the chair available in stock? "
+        f"{'Yes' if gaming_chair.check_availability() else 'No'}"
+    )
     print("=== Prices after discount ===")
     for discount in [0, 10, 50, 100]:
         print(f"Discount {discount}%: ${gaming_chair.calculate_discount(discount):.2f}")
@@ -71,7 +82,6 @@ def main():
     # except ValueError as e:
     #     print(e)
 
-
     print("\n=== Removing an item ===")
     cart.remove_item(dining_table)
     print(cart)
@@ -81,4 +91,3 @@ def main():
         cart.remove_item(dining_table)
     except ValueError as e:
         print(e)
-
