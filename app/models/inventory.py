@@ -11,7 +11,7 @@ from app.utils import get_index_furniture_by_values
 
 
 class Inventory:
-    _instance = None  # Singleton instance
+    _instance = None
 
     def __new__(cls):
         if cls._instance is None:
