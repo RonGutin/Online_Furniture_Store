@@ -18,41 +18,44 @@ def transform_pascal_to_snake(text):
 
 
 def get_index_furniture_by_values(self, item) -> Optional[int]:
-        """
-        Retrieves the index (ID) of a furniture item in
-        InventoryDB based on its attributes.
-        Returns:
-            - The ID if found.
-            - None if no match exists.
-        """
-        if item is None:
-            print("Error: item is None")
-            return None
+    """
+    Retrieves the index (ID) of a furniture item in
+    InventoryDB based on its attributes.
+    Returns:
+        - The ID if found.
+        - None if no match exists.
+    """
+    if item is None:
+        print("Error: item is None")
+        return None
+    ans = None
+    try:
+        furniture_type = transform_pascal_to_snake(item.__class__.__name__)
 
-        try:
-            furniture_type = transform_pascal_to_snake(item.__class__.__name__)
+        with SessionLocal() as session:
+            filters = [
+                InventoryDB.furniture_type == furniture_type,
+                InventoryDB.color == item.color,
+                InventoryDB.high == item.dimensions[0],
+                InventoryDB.depth == item.dimensions[1],
+                InventoryDB.width == item.dimensions[2],
+            ]
 
-            with SessionLocal() as session:
-                filters = [
-                    InventoryDB.furniture_type == furniture_type,
-                    InventoryDB.color == item.color,
-                    InventoryDB.high == item.dimensions[0],
-                    InventoryDB.depth == item.dimensions[1],
-                    InventoryDB.width == item.dimensions[2],
-                ]
+            # Add optional attributes only if they exist
+            if hasattr(item, "is_adjustable"):
+                filters.append(InventoryDB.is_adjustable == item.is_adjustable)
+            if hasattr(item, "has_armrest"):
+                filters.append(InventoryDB.has_armrest == item.has_armrest)
+            if hasattr(item, "material"):
+                filters.append(InventoryDB.material == item.material)
 
-                # Add optional attributes only if they exist
-                if hasattr(item, "is_adjustable"):
-                    filters.append(InventoryDB.is_adjustable == item.is_adjustable)
-                if hasattr(item, "has_armrest"):
-                    filters.append(InventoryDB.has_armrest == item.has_armrest)
-                if hasattr(item, "material"):
-                    filters.append(InventoryDB.material == item.material)
+            result = session.query(InventoryDB.id).filter(and_(*filters)).first()
+            if result:
+                ans = result[0]
 
-                result = session.query(InventoryDB.id).filter(and_(*filters)).first()
-
-                return result[0] if result else None
-
-        except Exception as e:
-            print(f"Error fetching data: {e}")
-            return None
+    except Exception as e:
+        print(f"Error fetching data: {e}")
+    
+    finally:
+        session.close()
+        return ans
