@@ -8,6 +8,7 @@ from app.data.DbConnection import (
 )
 from typing import Optional
 from app.models.inventory import Inventory
+from app.utils import get_index_furniture_by_values
 
 
 class Order:
@@ -42,11 +43,10 @@ class Order:
             session.refresh(order_db)
             self.id = order_db.id
 
-            inv = Inventory()
             for item, amount in self.items.items():
                 order_item_db = OrderContainsItemDB(
                     OrderID=self.id,
-                    ItemID=inv.get_index_furniture_by_values(item),
+                    ItemID=get_index_furniture_by_values(item),
                     Amount=amount,
                 )
                 session.add(order_item_db)

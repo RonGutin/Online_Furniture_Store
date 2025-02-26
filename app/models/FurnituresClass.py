@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from app.data.DbConnection import SessionLocal, InventoryDB
 from app.models.inventory import Inventory
+from app.utils import get_index_furniture_by_values
 
 
 class Furniture(ABC):
@@ -48,8 +49,7 @@ class Furniture(ABC):
 
     def check_availability(self, amount=1) -> bool:
         """Check if the furniture is available in stock."""
-        inv = Inventory()
-        key_f = inv.get_index_furniture_by_values(self)
+        key_f = get_index_furniture_by_values(self)
         ans = False
         session = None
         try:
@@ -78,8 +78,7 @@ class Furniture(ABC):
 
     def _get_info_furniture_by_key(self) -> tuple[int, str, str]:
         """Finding information about the item from the DB."""
-        inv = Inventory()
-        t_key = inv.get_index_furniture_by_values(self)
+        t_key = get_index_furniture_by_values(self)
         price = -1
         name = "None"
         desc = "None"
@@ -338,7 +337,10 @@ class WorkDesk(Table):
         """
         key = f"{self.color.lower()} & {self.material.lower()}"
         matches = WorkDesk.__optimal_matches.get(key, [])
-        ans = self.get_match_furniture(matches)
+        if len(matches) == 0:
+            ans = "Sorry, we did not find an item that could match your selection on our site."
+        else:
+            ans = self.get_match_furniture(matches)
         print(ans)
 
 
@@ -365,6 +367,8 @@ class CoffeeTable(Table):
         """
         key = f"{self.color.lower()} & {self.material.lower()}"
         matches = CoffeeTable.__optimal_matches.get(key, [])
+        if len(matches) == 0:
+            ans = "Sorry, we did not find an item that could match your selection on our site."
         ans = self.get_match_furniture(matches)
         print(ans)
 
@@ -395,6 +399,8 @@ class GamingChair(Chair):
         """
         key = f"{self.color.lower()} & {self.is_adjustable} & {self.has_armrest}"
         matches = GamingChair.__optimal_matches.get(key, [])
+        if len(matches) == 0:
+            ans = "Sorry, we did not find an item that could match your selection on our site."
         ans = self.get_match_furniture(matches)
         print(ans)
 
@@ -425,5 +431,7 @@ class WorkChair(Chair):
         """
         key = f"{self.color.lower()} & {self.is_adjustable} & {self.has_armrest}"
         matches = WorkChair.__optimal_matches.get(key, [])
+        if len(matches) == 0:
+            ans = "Sorry, we did not find an item that could match your selection on our site."
         ans = self.get_match_furniture(matches)
         print(ans)
