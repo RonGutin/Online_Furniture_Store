@@ -310,7 +310,10 @@ class DiningTable(Table):
         """
         key = f"{self.color.lower()} & {self.material.lower()}"
         matches = DiningTable.__optimal_matches.get(key, [])
-        ans = self.get_match_furniture(matches)
+        if len(matches) == 0:
+            ans = "Sorry, we did not find an item that could match your selection on our site."
+        else:
+            ans = self.get_match_furniture(matches)
         print(ans)
 
 
@@ -369,7 +372,8 @@ class CoffeeTable(Table):
         matches = CoffeeTable.__optimal_matches.get(key, [])
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
-        ans = self.get_match_furniture(matches)
+        else:
+            ans = self.get_match_furniture(matches)
         print(ans)
 
 
@@ -401,7 +405,8 @@ class GamingChair(Chair):
         matches = GamingChair.__optimal_matches.get(key, [])
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
-        ans = self.get_match_furniture(matches)
+        else:
+            ans = self.get_match_furniture(matches)
         print(ans)
 
 
@@ -433,5 +438,6 @@ class WorkChair(Chair):
         matches = WorkChair.__optimal_matches.get(key, [])
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
-        ans = self.get_match_furniture(matches)
+        else:
+            ans = self.get_match_furniture(matches)
         print(ans)
