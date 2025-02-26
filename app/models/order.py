@@ -73,7 +73,7 @@ class Order:
                 raise ValueError("Order is already in final status (DELIVERED)")
 
             next_status = OrderStatus(current_status.value + 1).value
-            
+
             session.query(OrdersDB).filter(OrdersDB.id == self.id).update(
                 {"Ostatus": next_status}
             )

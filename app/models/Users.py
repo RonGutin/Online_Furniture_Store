@@ -18,9 +18,9 @@ from app.models.FurnituresClass import Chair, Table
 class BasicUser(ABC):
     """
     Abstract base class for all user types in the system.
-    
+
     This class provides common functionality for user authentication and validation.
-    
+
     Attributes:
         name (str): User's name
         email (str): User's validated email address
@@ -30,14 +30,14 @@ class BasicUser(ABC):
     def __init__(self, name: str, email: str, password: str) -> None:
         """
         Initialize a new User instance.
-        
+
         Note: This should only be called by the Authentication class.
-        
+
         Args:
             name (str): User's name
             email (str): User's email address (will be validated)
             password (str): User's hashed password
-        
+
         Raises:
             ValueError: If the email format is invalid
         """
@@ -67,7 +67,7 @@ class BasicUser(ABC):
     def set_password(self, new_password: str) -> None:
         """
         Set a new password for the user.
-        
+
         Args:
             new_password (str): The new plain text password
         """
@@ -77,7 +77,7 @@ class BasicUser(ABC):
     def __repr__(self) -> str:
         """
         Return a string representation of the user.
-        
+
         Returns:
             str: A string representation of the user
         """
@@ -103,9 +103,9 @@ class User(BasicUser):
     ) -> None:
         """
         Initialize a new User instance.
-        
+
         Note: This should only be called by the Authentication class.
-        
+
         Args:
             name (str): User's name
             email (str): User's email address
@@ -124,11 +124,11 @@ class User(BasicUser):
     ) -> None:
         """
         Update user profile information.
-        
+
         Args:
             address (Optional[str], optional): New address. Defaults to None.
             name (Optional[str], optional): New name. Defaults to None.
-            
+
         Raises:
             ValueError: If user not found in database
             Exception: If an error occurs during update
@@ -145,7 +145,7 @@ class User(BasicUser):
                 session.query(BasicUserDB)
                 .filter(BasicUserDB.email == self.email)
                 .first()
-            ) 
+            )
 
             if address is not None:
                 user_db.address = address
@@ -164,10 +164,10 @@ class User(BasicUser):
     def update_credit(self, credit: float) -> None:
         """
         Update user's credit balance.
-        
+
         Args:
             credit (float): Amount to add to user's credit (can be negative)
-            
+
         Raises:
             ValueError: If user not found in database
             Exception: If an error occurs during update
@@ -190,7 +190,7 @@ class User(BasicUser):
     def view_cart(self) -> str:
         """
         Get a string representation of the user's shopping cart.
-        
+
         Returns:
             str: String representation of the cart
         """
@@ -208,7 +208,7 @@ class User(BasicUser):
     def set_password(self, new_password: str) -> None:
         """
         Set a new password for the user.
-        
+
         Args:
             new_password (str): The new plain text password
         """
@@ -218,14 +218,14 @@ class User(BasicUser):
     def checkout(self, credit_card_num: int, coupon_code: Optional[str] = None) -> bool:
         """
         Process checkout of items in the shopping cart.
-        
+
         Args:
             credit_card_num (int): Credit card number for payment
             coupon_code (Optional[str], optional): Discount coupon code. Defaults to None.
-            
+
         Returns:
             bool: True if checkout was successful, False otherwise
-            
+
         Raises:
             ValueError: If cart is empty, item quantity is invalid, or credit card is invalid
         """
@@ -275,7 +275,7 @@ class User(BasicUser):
     def __repr__(self) -> str:
         """
         String representation of the User object.
-        
+
         Returns:
             str: String representation of the user
         """
@@ -285,9 +285,9 @@ class User(BasicUser):
 class Manager(BasicUser):
     """
     Manager class for administrative operations in the furniture store.
-    
+
     Managers can manage users, inventory, and orders in the system.
-    
+
     Attributes:
         name (str): Manager's name
         email (str): Manager's email address
@@ -297,9 +297,9 @@ class Manager(BasicUser):
     def __init__(self, name: str, email: str, password: str) -> None:
         """
         Initialize a new Manager instance.
-        
+
         Note: This should only be called by the Authentication class.
-        
+
         Args:
             name (str): Manager's name
             email (str): Manager's email address
@@ -310,7 +310,7 @@ class Manager(BasicUser):
     def __repr__(self) -> str:
         """
         String representation of the Manager object.
-        
+
         Returns:
             str: String representation of the manager
         """
@@ -319,10 +319,10 @@ class Manager(BasicUser):
     def delete_user(self, email: str) -> None:
         """
         Delete user from databases.
-        
+
         Args:
             email (str): Email of the user to delete
-            
+
         Raises:
             Exception: If an error occurs during deletion
         """
@@ -347,7 +347,7 @@ class Manager(BasicUser):
     def set_password(self, new_password: str) -> None:
         """
         Set a new password for the manager.
-        
+
         Args:
             new_password (str): The new plain text password
         """
@@ -357,12 +357,12 @@ class Manager(BasicUser):
     def add_manager(self, name: str, email: str, password: str) -> Optional[Manager]:
         """
         Add a new manager to the system.
-        
+
         Args:
             name (str): New manager's name
             email (str): New manager's email
             password (str): New manager's plain text password
-            
+
         Returns:
             Optional[Manager]: New Manager object if successful, None otherwise
         """
@@ -371,10 +371,10 @@ class Manager(BasicUser):
     def update_order_status(self, order_id: int) -> None:
         """
         Update order status in Database.
-        
+
         Args:
             order_id (int): ID of the order to update
-            
+
         Raises:
             ValueError: If order is already delivered
             Exception: If an error occurs during update
@@ -398,13 +398,13 @@ class Manager(BasicUser):
     ) -> None:
         """
         Update inventory item quantity.
-        
+
         Args:
             item (Union[Chair, Table]): Furniture item to update
             quantity (int): Quantity to add or remove
             f_type_enum (int): Furniture type enum value
             sign (int): 1 for addition, 0 for subtraction
-            
+
         Raises:
             ValueError: If quantity is negative or sign is invalid
             Exception: If an error occurs during update
@@ -423,9 +423,9 @@ class Manager(BasicUser):
     def get_all_orders(self) -> None:
         """
         Retrieve and display all orders from the database.
-        
+
         Prints all orders in a structured format.
-        
+
         Raises:
             Exception: If an error occurs during retrieval
         """
