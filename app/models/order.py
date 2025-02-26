@@ -65,19 +65,20 @@ class Order:
         Raises:
             ValueError: If the order is already in its final status (DELIVERED)
         """
-        current_status = OrderStatus(self.status)
-
-        if current_status == OrderStatus.DELIVERED:
-            raise ValueError("Order is already in final status (DELIVERED)")
-
-        next_status = OrderStatus(self.status + 1).value
         session = SessionLocal()
         try:
+            current_status = OrderStatus(self.status)
+
+            if current_status == OrderStatus.DELIVERED:
+                raise ValueError("Order is already in final status (DELIVERED)")
+
+            next_status = OrderStatus(current_status.value + 1).value
+            
             session.query(OrdersDB).filter(OrdersDB.id == self.id).update(
                 {"Ostatus": next_status}
             )
             session.commit()
-            self.status = OrderStatus(self.status + 1).value
+            self.status = next_status
         except Exception as e:
             session.rollback()
             raise RuntimeError(f"Failed to update order status: {e}")

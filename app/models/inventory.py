@@ -10,7 +10,7 @@ from app.data.DbConnection import SessionLocal, InventoryDB
 
 
 class Inventory:
-    _instance = None  # Singleton instance
+    _instance = None
 
     def __new__(cls):
         if cls._instance is None:

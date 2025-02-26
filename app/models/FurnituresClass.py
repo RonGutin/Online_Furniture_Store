@@ -118,7 +118,7 @@ class Furniture(ABC):
         pass
 
 
-class Table(Furniture):
+class Table(Furniture, ABC):
 
     def __init__(self, color: str, material: str):
         super().__init__(color)
@@ -212,7 +212,7 @@ class Table(Furniture):
         pass
 
 
-class Chair(Furniture):
+class Chair(Furniture, ABC):
 
     def __init__(self, color: str, is_adjustable: bool, has_armrest: bool):
         super().__init__(color)
