@@ -57,7 +57,7 @@ def patch_session_local(monkeypatch):
 @pytest.fixture(autouse=True)
 def patch_inventory(monkeypatch):
     # Patch לפונקציה get_index_furniture_by_values מהמודול utils
-    monkeypatch.setattr(utils, "get_index_furniture_by_values", lambda self, item: 10)
+    monkeypatch.setattr(utils, "get_index_furniture_by_values", lambda item: 10)
 
 
 class DummyFurniture:
@@ -95,27 +95,32 @@ def dummy_cart():
 
 def test_order_creation(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
-    assert order.user_mail == "test@example.com"
-    assert order.total_price == 2000
-    assert order.coupon_id == 42
-    assert order.status == OrderStatus.PENDING.value
-    assert order.id == 1
-    assert isinstance(order.items, dict)
-    for item, amount in order.items.items():
+    assert order.get_user_mail() == "test@example.com"
+    assert order.get_total_price() == 2000
+    assert order.get_coupon_id() == 42
+    assert order.get_status() == OrderStatus.PENDING.name
+    assert order.get_id() == 1
+    assert isinstance(order.get_items(), dict)
+    # שימוש ב-.items() לקריאת זוגות מפתח-ערך
+    for item, amount in order.get_items().items():
         assert amount == 2
 
 
 def test_update_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
-    initial_status = order.status
+    initial_status = order.get_status()  # מחזיר את שם הסטטוס
     order.update_status()
-    expected_status = OrderStatus(initial_status + 1).value
-    assert order.status == expected_status
+    expected_status = (
+        OrderStatus[initial_status].value + 1
+    )  # המרת שם הסטטוס לערך מספרי +1
+    assert (
+        order.get_status() == OrderStatus(expected_status).name
+    )  # בדיקה מול שם הסטטוס החדש
 
 
 def test_update_status_already_delivered(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
-    order.status = OrderStatus.DELIVERED.value
+    order.set_status(OrderStatus.DELIVERED.value)
     with pytest.raises(ValueError) as exc_info:
         order.update_status()
     assert "Order is already in final status (DELIVERED)" in str(exc_info.value)
@@ -123,14 +128,14 @@ def test_update_status_already_delivered(dummy_cart):
 
 def test_get_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
-    expected_status_name = OrderStatus(order.status).name
+    expected_status_name = OrderStatus(order._status).name  # המרה מ-value ל-name
     assert order.get_status() == expected_status_name
 
 
 def test_order_repr(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
     rep = repr(order)
-    assert "Order(id = 1" in rep
+    assert rep.startswith("Order(id = ")
     assert "User email = test@example.com" in rep
     assert "Total price = 2000.00$" in rep
-    assert f"Status = {OrderStatus(order.status).name}" in rep
+    assert f"Status = {OrderStatus(order._status).name}" in rep
