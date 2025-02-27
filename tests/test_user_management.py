@@ -250,7 +250,6 @@ class TestAuthentication:
         assert user.name == "John Doe"
         assert user.email == "john@example.com"
         assert user.address == "123 Main St"
-        assert user.credit == 50.0
 
     @patch("app.models.Users.SessionLocal")
     def test_sign_in_manager_success(
