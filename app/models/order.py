@@ -13,66 +13,75 @@ from app.utils import get_index_furniture_by_values
 
 
 class Order:
-    """Represents an order in the furniture store.
-
-    Attributes:
-        user_mail (str): The email of the user placing the order.
-        total_price (float): The total price of the items in the order.
-        status (str): The current status of the order.
-        items (list): A deep copy of the items in the shopping cart.
-        coupon_id (Optional[int]): The ID of the applied coupon (if any).
-        id (Optional[int]): The ID of the order in the database.
-    """
+    """Represents an order in the furniture store."""
 
     def __init__(
         self, user_mail: str, cart: ShoppingCart, coupon_id: Optional[int] = None
     ) -> None:
-        """
-        Initializes an order with user details, cart contents, and optional coupon.
-
-        Args:
-            user_mail (str): The email of the user placing the order.
-            cart (ShoppingCart): The shopping cart associated with the order.
-            coupon_id (Optional[int], optional): The ID of the applied coupon. Defaults to None.
-
-        Raises:
-            ValueError: If the provided cart is not an instance of ShoppingCart.
-        """
         if not isinstance(cart, ShoppingCart):
             raise ValueError("Invalid cart. Must be an instance of ShoppingCart.")
 
-        self.__user_mail: str = user_mail
-        self.total_price: float = cart.get_total_price()
+        self._user_mail: str = user_mail
+        self._total_price: float = cart.get_total_price()
         self._status: str = OrderStatus.PENDING.value
-        self.items: list = deepcopy(cart.items)
-        self.coupon_id: Optional[int] = coupon_id
-        self.id: Optional[int] = None
+        self._items: list = deepcopy(cart.items)
+        self._coupon_id: Optional[int] = coupon_id
+        self._id: Optional[int] = None
 
         self._save_to_db()
     
     def get_user_mail(self) -> str:
-        return self.__user_mail
+        return self._user_mail
 
     def set_user_mail(self, user_mail: str) -> None:
-        self.__user_mail = user_mail
+        self._user_mail = user_mail
+
+    def get_total_price(self) -> float:
+        return self._total_price
+
+    def set_total_price(self, total_price: float) -> None:
+        self._total_price = total_price
+
+    def get_status(self) -> str:
+        return OrderStatus(self._status).name
+    
+    def set_status(self, status: str = OrderStatus.PENDING) -> None:
+        self._status = status
+
+    def get_items(self) -> list:
+        return self._items
+
+    def set_items(self, items: list) -> None:
+        self._items = items
+
+    def get_coupon_id(self) -> Optional[int]:
+        return self._coupon_id
+
+    def set_coupon_id(self, coupon_id: Optional[int]) -> None:
+        self._coupon_id = coupon_id
+
+    def get_id(self) -> Optional[int]:
+        return self._id
+
+    def set_id(self, order_id: Optional[int]) -> None:
+        self._id = order_id
 
     def _save_to_db(self) -> None:
-        """Saves the order to the database"""
         session = SessionLocal()
         try:
             order_db = OrdersDB(
                 Ostatus=self._status,
-                UserEmail=self.__user_mail,
-                idCouponsCodes=self.coupon_id,
+                UserEmail=self._user_mail,
+                idCouponsCodes=self._coupon_id,
             )
             session.add(order_db)
             session.commit()
             session.refresh(order_db)
-            self.id = order_db.id
+            self._id = order_db.id
 
-            for item, amount in self.items.items():
+            for item, amount in self._items.items():
                 order_item_db = OrderContainsItemDB(
-                    OrderID=self.id,
+                    OrderID=self._id,
                     ItemID=get_index_furniture_by_values(item),
                     Amount=amount,
                 )
@@ -88,22 +97,16 @@ class Order:
             session.close()
 
     def update_status(self) -> None:
-        """
-        Updates the order status to the next status in the enum sequence.
-
-        Raises:
-            ValueError: If the order is already in its final status (DELIVERED)
-        """
         session = SessionLocal()
         try:
             current_status = OrderStatus(self._status)
 
             if current_status == OrderStatus.DELIVERED:
-                raise ValueError
+                raise ValueError("Order is already in final status (DELIVERED)")
 
             next_status = OrderStatus(current_status.value + 1).value
 
-            session.query(OrdersDB).filter(OrdersDB.id == self.id).update(
+            session.query(OrdersDB).filter(OrdersDB.id == self._id).update(
                 {"Ostatus": next_status}
             )
             session.commit()
@@ -118,17 +121,8 @@ class Order:
         finally:
             session.close()
 
-    def get_status(self) -> str:
-        """Returns the order status as a string."""
-        return OrderStatus(self._status).name
-    
-    def set_status(self, status: str = OrderStatus.PENDING) -> None:
-        """Seta the order status."""
-        self._status = status
-
     def __repr__(self) -> str:
-        """Returns a string representation of the order."""
         return (
-            f"Order(id = {self.id}, User email = {self.__user_mail}, "
-            f"Total price = {self.total_price:.2f}$, Status = {OrderStatus(self._status).name})"
+            f"Order(id = {self._id}, User email = {self._user_mail}, "
+            f"Total price = {self._total_price:.2f}$, Status = {OrderStatus(self._status).name})"
         )
