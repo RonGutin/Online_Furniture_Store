@@ -7,7 +7,6 @@ from app.data.DbConnection import (
     OrderContainsItemDB,
 )
 from typing import Optional
-from app.models.inventory import Inventory
 from app.utils import get_index_furniture_by_values
 
 
@@ -70,7 +69,7 @@ class Order:
             current_status = OrderStatus(self.status)
 
             if current_status == OrderStatus.DELIVERED:
-                raise ValueError("Order is already in final status (DELIVERED)")
+                raise ValueError
 
             next_status = OrderStatus(current_status.value + 1).value
 
@@ -79,9 +78,10 @@ class Order:
             )
             session.commit()
             self.status = next_status
-        except Exception as e:
+        except ValueError:
+            raise ValueError("Order is already in final status (DELIVERED)")
+        except Exception:
             session.rollback()
-            raise RuntimeError(f"Failed to update order status: {e}")
         finally:
             session.close()
 

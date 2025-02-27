@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from app.data.DbConnection import SessionLocal, InventoryDB
-from app.models.inventory import Inventory
 from app.utils import get_index_furniture_by_values
 
 
