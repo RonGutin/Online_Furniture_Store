@@ -86,10 +86,10 @@ def test_apply_tax(furniture_objects):
 @pytest.mark.parametrize("price, expected", [(1500.0, 1500.0), (2000.0, 2000.0)])
 def test_get_price(price, expected, furniture_objects):
     dining_table = furniture_objects["dining_table"]
-    dining_table.price = price
+    dining_table.set_price(price)
     assert dining_table.get_price() == expected
 
-    dining_table.price = None
+    dining_table.set_price(None)
     with pytest.raises(ValueError):
         dining_table.get_price()
 
@@ -106,10 +106,10 @@ def test_get_match_furniture(mock_session, furniture_objects):
 
     with patch.object(
         furniture_objects["dining_table"],
-        "get_match_furniture",
+        "_get_match_furniture",
         return_value="SPECIAL OFFER: Great Chair",
     ):
-        advertisement = furniture_objects["dining_table"].get_match_furniture([13, 14])
+        advertisement = furniture_objects["dining_table"]._get_match_furniture([13, 14])
 
     assert "SPECIAL OFFER" in advertisement
     assert "Great Chair" in advertisement
@@ -130,7 +130,7 @@ def test_Print_matching_product_advertisement(
 
     with patch.object(
         furniture_objects["dining_table"],
-        "get_match_furniture",
+        "_get_match_furniture",
         return_value=(
             "*** SPECIAL OFFER !!! ***\n"
             "We found a matching chair for your table!\n"

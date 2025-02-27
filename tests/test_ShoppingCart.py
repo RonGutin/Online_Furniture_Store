@@ -14,8 +14,8 @@ def cart():
 def furniture_items():
     dining_table = DiningTable(color="brown", material="wood")
     gaming_chair = GamingChair(color="Black", is_adjustable=True, has_armrest=True)
-    dining_table.price = 1000.0
-    gaming_chair.price = 500.0
+    dining_table.set_price(1000.0)
+    gaming_chair.set_price(500.0)
     return {"dining_table": dining_table, "gaming_chair": gaming_chair}
 
 
@@ -81,11 +81,11 @@ def test_apply_discount_with_items(cart, furniture_items):
 @patch("app.models.ShoppingCart.SessionLocal")
 @patch.object(
     DiningTable,
-    "get_match_furniture",
+    "_get_match_furniture",
     return_value="*** SPECIAL OFFER ***\nWe found a matching chair!",
 )
 def test_add_item_valid_and_ad_print(
-    mock_get_match_furniture, mock_session, mock_stdout, cart, furniture_items
+    mock__get_match_furniture, mock_session, mock_stdout, cart, furniture_items
 ):
     mock_db = MagicMock()
     mock_session.return_value = mock_db

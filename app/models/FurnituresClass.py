@@ -30,7 +30,7 @@ class Furniture(ABC):
         self._validate_color(color)  # Checking that the color matches
         self.color = color
         price, name, desc = self._get_info_furniture_by_key()
-        self.price = price
+        self._price = price
         self.name = name
         self.desc = desc
 
@@ -82,7 +82,7 @@ class Furniture(ABC):
         if discount_percentage < 0:
             raise ValueError("Discount percentage cannot be negative.")
 
-        return self.price * (1 - 0.01 * discount_percentage)
+        return self._price * (1 - 0.01 * discount_percentage)
 
     def apply_tax(self, tax_rate: float) -> float:
         """
@@ -100,12 +100,7 @@ class Furniture(ABC):
         if tax_rate < 0:
             raise ValueError("Tax rate cannot be negative.")
 
-        return self.price * (1 + 0.01 * tax_rate)
-
-    def get_color(self) -> str:
-        """Return the color of the furniture."""
-
-        return self.color
+        return self._price * (1 + 0.01 * tax_rate)
 
     def check_availability(self, amount=1) -> bool:
         """Check if the furniture is available in stock."""
@@ -135,10 +130,13 @@ class Furniture(ABC):
 
     def get_price(self) -> float:
         """get the furniture price."""
-        if self.price is None:
+        if self._price is None:
             raise ValueError("Price is not set yet.")
 
-        return self.price
+        return self._price
+
+    def set_price(self, price: float) -> None:
+        self._price = price
 
     def _get_info_furniture_by_key(self) -> Tuple[int, str, str]:
         """
@@ -188,7 +186,7 @@ class Furniture(ABC):
         pass
 
     @abstractmethod
-    def get_match_furniture(self) -> int:
+    def _get_match_furniture(self) -> int:
         """Finding a matching furniture number"""
         pass
 
@@ -256,7 +254,7 @@ class Table(Furniture, ABC):
             f"Table Details:\n"
             f"  Name: {self.name}\n"
             f"  Description: {self.desc}\n"
-            f"  Price: ${self.price:.2f}\n"
+            f"  Price: ${self._price:.2f}\n"
             f"  Dimensions (L x W x H): "
             f"{self.__class__.dimensions[0]} x {self.__class__.dimensions[1]} x "
             f"{self.__class__.dimensions[2]} cm\n"
@@ -266,7 +264,7 @@ class Table(Furniture, ABC):
             f"{', '.join(self.available_colors)}\n"
         )
 
-    def get_match_furniture(self, Furniture_options: list) -> str:
+    def _get_match_furniture(self, Furniture_options: list) -> str:
         """
         Searches within the range of chair IDs (chairs_key[0] to chairs_key[1])
         for an available chair in stock, and create a matching advertisement if found.
@@ -363,13 +361,13 @@ class Chair(Furniture, ABC):
             f"  Description: {self.desc}\n"
             f"  Is Adjustable: {'Yes' if self.is_adjustable else 'No'}\n"
             f"  Has Armrest: {'Yes' if self.has_armrest else 'No'}\n"
-            f"  Price: ${self.price:.2f}\n"
+            f"  Price: ${self._price:.2f}\n"
             f"  Dimensions: {self.__class__.dimensions[0]} x "
             f"{self.__class__.dimensions[1]} x {self.__class__.dimensions[2]} cm\n"
             f"  Color: {self.color}\n"
         )
 
-    def get_match_furniture(self, Furniture_options: list) -> str:
+    def _get_match_furniture(self, Furniture_options: list) -> str:
         """
         Searches within the range of tables IDs
         for an available table in stock, and create a matching advertisement if found.
@@ -450,7 +448,7 @@ class DiningTable(Table):
         """
         Find a matching chair for the dining table based on the color & material.
         If no suitable chair is found, print a message that it's a unique item.
-        Otherwise, print the result from get_match_furniture.
+        Otherwise, print the result from _get_match_furniture.
         """
         key: str = f"{self.color.lower()} & {self.material.lower()}"
         matches: List[int] = DiningTable.__optimal_matches.get(key, [])
@@ -458,7 +456,7 @@ class DiningTable(Table):
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
         else:
-            ans = self.get_match_furniture(matches)
+            ans = self._get_match_furniture(matches)
 
         print(ans)
 
@@ -489,7 +487,7 @@ class WorkDesk(Table):
         """
         Find a matching chair for the work desk based on color & material.
         If no suitable chair is found, print a message that it's a unique item.
-        Otherwise, print the result from get_match_furniture.
+        Otherwise, print the result from _get_match_furniture.
         """
         key: str = f"{self.color.lower()} & {self.material.lower()}"
         matches: List[int] = WorkDesk.__optimal_matches.get(key, [])
@@ -497,7 +495,7 @@ class WorkDesk(Table):
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
         else:
-            ans = self.get_match_furniture(matches)
+            ans = self._get_match_furniture(matches)
 
         print(ans)
 
@@ -528,7 +526,7 @@ class CoffeeTable(Table):
         """
         Find a matching chair for the work desk based on color & material.
         If no suitable chair is found, print a message that it's a unique item.
-        Otherwise, print the result from get_match_furniture.
+        Otherwise, print the result from _get_match_furniture.
         """
         key: str = f"{self.color.lower()} & {self.material.lower()}"
         matches: List[int] = CoffeeTable.__optimal_matches.get(key, [])
@@ -536,7 +534,7 @@ class CoffeeTable(Table):
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
         else:
-            ans = self.get_match_furniture(matches)
+            ans = self._get_match_furniture(matches)
 
         print(ans)
 
@@ -571,7 +569,7 @@ class GamingChair(Chair):
         """
         Find a matching table for the gaming chair based on color, adjustability, and armrests.
         If no suitable table is found, print a message that it's a unique item.
-        Otherwise, print the result from get_match_furniture.
+        Otherwise, print the result from _get_match_furniture.
 
         This method prints an advertisement based on the available tables
         that match the color, adjustability, and armrest of the gaming chair.
@@ -582,7 +580,7 @@ class GamingChair(Chair):
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
         else:
-            ans = self.get_match_furniture(matches)
+            ans = self._get_match_furniture(matches)
 
         print(ans)
 
@@ -617,7 +615,7 @@ class WorkChair(Chair):
         """
         Find a matching table for the work chair based on color, is_adjustable, has_armrest.
         If no suitable table is found, print a message that it's a unique item.
-        Otherwise, print the result from get_match_furniture.
+        Otherwise, print the result from _get_match_furniture.
         """
         key: str = f"{self.color.lower()} & {self.is_adjustable} & {self.has_armrest}"
         matches: List[int] = WorkChair.__optimal_matches.get(key, [])
@@ -625,6 +623,6 @@ class WorkChair(Chair):
         if len(matches) == 0:
             ans = "Sorry, we did not find an item that could match your selection on our site."
         else:
-            ans = self.get_match_furniture(matches)
+            ans = self._get_match_furniture(matches)
 
         print(ans)
