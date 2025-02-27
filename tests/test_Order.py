@@ -57,8 +57,7 @@ def patch_session_local(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def patch_inventory(monkeypatch):
-    """
-    """
+    """ """
     monkeypatch.setattr(
         Inventory, "get_index_furniture_by_values", lambda self, item: 10
     )

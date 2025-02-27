@@ -7,7 +7,6 @@ from app.data.DbConnection import (
     OrderContainsItemDB,
 )
 from typing import Optional
-from app.models.inventory import Inventory
 from app.utils import get_index_furniture_by_values
 
 

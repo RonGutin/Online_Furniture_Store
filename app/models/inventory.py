@@ -1,5 +1,4 @@
 from cmath import inf
-from typing import Optional
 
 from flask import jsonify
 from sqlalchemy import and_

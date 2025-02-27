@@ -55,7 +55,7 @@ def get_index_furniture_by_values(self, item) -> Optional[int]:
 
     except Exception as e:
         print(f"Error fetching data: {e}")
-    
+
     finally:
         session.close()
         return ans
