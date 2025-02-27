@@ -304,7 +304,7 @@ class Authentication:
 
 class BasicUser(ABC):
     """
-    Abstract base class for all user types in the system.
+    Abstract base class for all user types in the system..
 
     This class provides common functionality for user authentication and validation.
 
