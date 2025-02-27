@@ -1,0 +1,26 @@
+# Virtual environment files
+.venv/
+.conda/
+
+# Temporary files
+*.pyc
+__pycache__/
+*.log
+
+# Cache files from various tools
+.pytest_cache/
+.ruff_cache/
+
+# VS Code configuration files
+.vscode/
+
+# Test results
+.coverage
+htmlcov/
+
+# GitHub Actions directory (if containing sensitive information)
+.github/workflows/
+
+# Dependencies installed via pip.
+env/
+venv/
