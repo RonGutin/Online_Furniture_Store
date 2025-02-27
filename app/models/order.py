@@ -1,10 +1,14 @@
 from copy import deepcopy
-
 from typing import Optional
 
 from app.data.DbConnection import OrdersDB, OrderContainsItemDB, SessionLocal
 from app.models.EnumsClass import OrderStatus
 from app.models.ShoppingCart import ShoppingCart
+from app.data.DbConnection import (
+    SessionLocal,
+    OrdersDB,
+    OrderContainsItemDB,
+)
 from app.utils import get_index_furniture_by_values
 
 
