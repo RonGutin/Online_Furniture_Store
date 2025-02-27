@@ -4,6 +4,7 @@ from app.models.ShoppingCart import ShoppingCart
 from app.models.order import Order
 from app import utils
 
+
 class DummyQuery:
     def __init__(self):
         self.updated = False
@@ -14,6 +15,7 @@ class DummyQuery:
     def update(self, values):
         self.updated = True
         return 1
+
 
 class DummySession:
     def __init__(self):
@@ -38,20 +40,25 @@ class DummySession:
     def close(self):
         pass
 
+
 @pytest.fixture(autouse=True)
 def patch_session_local(monkeypatch):
     """
     מחליף את SessionLocal כך שיחזיר DummySession
     במקום אובייקט Session אמיתי.
     """
+
     def _dummy_session_local():
         return DummySession()
+
     monkeypatch.setattr("app.models.order.SessionLocal", _dummy_session_local)
+
 
 @pytest.fixture(autouse=True)
 def patch_inventory(monkeypatch):
     # Patch לפונקציה get_index_furniture_by_values מהמודול utils
     monkeypatch.setattr(utils, "get_index_furniture_by_values", lambda self, item: 10)
+
 
 class DummyFurniture:
     def __init__(self, price):
@@ -74,6 +81,7 @@ class DummyFurniture:
     def Print_matching_product_advertisement(self):
         print("*** SPECIAL OFFER !!! ***\nSome advertisement text")
 
+
 @pytest.fixture
 def dummy_cart():
     cart = ShoppingCart()
@@ -83,6 +91,7 @@ def dummy_cart():
         f.get_price() * amt for f, amt in cart.items.items()
     )
     return cart
+
 
 def test_order_creation(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
@@ -95,12 +104,14 @@ def test_order_creation(dummy_cart):
     for item, amount in order.items.items():
         assert amount == 2
 
+
 def test_update_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
     initial_status = order.status
     order.update_status()
     expected_status = OrderStatus(initial_status + 1).value
     assert order.status == expected_status
+
 
 def test_update_status_already_delivered(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
@@ -109,10 +120,12 @@ def test_update_status_already_delivered(dummy_cart):
         order.update_status()
     assert "Order is already in final status (DELIVERED)" in str(exc_info.value)
 
+
 def test_get_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
     expected_status_name = OrderStatus(order.status).name
     assert order.get_status() == expected_status_name
+
 
 def test_order_repr(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)

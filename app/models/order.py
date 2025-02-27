@@ -80,7 +80,7 @@ class Order:
             self.status = next_status
         except ValueError:
             raise ValueError("Order is already in final status (DELIVERED)")
-        except Exception as e:
+        except Exception:
             session.rollback()
         finally:
             session.close()

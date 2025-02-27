@@ -17,7 +17,7 @@ def transform_pascal_to_snake(text):
     return text.upper()
 
 
-def get_index_furniture_by_values(item: 'Furniture') -> Optional[int]:
+def get_index_furniture_by_values(item) -> Optional[int]:
     """
     Retrieves the index (ID) of a furniture item in
     InventoryDB based on its attributes.

@@ -8,11 +8,13 @@ from app.models.FurnituresClass import (
     WorkChair,
 )
 
+
 @pytest.fixture(autouse=True)
 def mock_db_connection():
     with patch("app.data.DbConnection.SessionLocal") as mock_session:
         mock_session.return_value = MagicMock()
         yield
+
 
 @pytest.fixture
 def furniture_objects():
@@ -47,10 +49,12 @@ def furniture_objects():
             "work_chair": WorkChair(color="red", is_adjustable=True, has_armrest=False),
         }
 
+
 @pytest.mark.parametrize("color, material", [("Purple", "wood"), ("Green", "wood")])
 def test_invalid_color(color, material):
     with pytest.raises(ValueError):
         DiningTable(color=color, material=material)
+
 
 @pytest.mark.parametrize(
     "color, material",
@@ -63,6 +67,7 @@ def test_invalid_material(color, material):
     with pytest.raises(ValueError):
         CoffeeTable(color=color, material=material)
 
+
 def test_calculate_discount(furniture_objects):
     dining_table = furniture_objects["dining_table"]
     assert dining_table.calculate_discount(10) == 900.0
@@ -70,11 +75,13 @@ def test_calculate_discount(furniture_objects):
     with pytest.raises(ValueError):
         dining_table.calculate_discount(-5)
 
+
 def test_apply_tax(furniture_objects):
     dining_table = furniture_objects["dining_table"]
     assert dining_table.apply_tax(10) == 1100.0
     with pytest.raises(ValueError):
         dining_table.apply_tax(-8)
+
 
 @pytest.mark.parametrize("price, expected", [(1500.0, 1500.0), (2000.0, 2000.0)])
 def test_get_price(price, expected, furniture_objects):
@@ -85,6 +92,7 @@ def test_get_price(price, expected, furniture_objects):
     dining_table.price = None
     with pytest.raises(ValueError):
         dining_table.get_price()
+
 
 @patch("app.models.FurnituresClass.SessionLocal")
 def test_get_match_furniture(mock_session, furniture_objects):
@@ -105,6 +113,7 @@ def test_get_match_furniture(mock_session, furniture_objects):
 
     assert "SPECIAL OFFER" in advertisement
     assert "Great Chair" in advertisement
+
 
 @patch("builtins.print")
 @patch("app.models.FurnituresClass.SessionLocal")
