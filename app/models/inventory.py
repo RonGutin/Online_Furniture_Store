@@ -11,7 +11,7 @@ from app.utils import transform_pascal_to_snake, get_index_furniture_by_values
 class Inventory:
     """Singleton class for managing inventory."""
 
-    _instance: Optional["Inventory"] = None
+    instance: Optional["Inventory"] = None
 
     def __new__(cls) -> "Inventory":
         """Ensures only one instance of Inventory exists (Singleton pattern)."""
