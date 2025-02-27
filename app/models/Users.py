@@ -335,7 +335,7 @@ class BasicUser(ABC):
     @property
     def password(self):
         return self.__password
-    
+
     def __validate_email(self, email: str) -> str:
         """
         Validate email format using regex.
@@ -413,7 +413,7 @@ class User(BasicUser):
     @property
     def credit(self):
         return self.__credit
-    
+
     def update_user_details(
         self, address: Optional[str] = None, name: Optional[str] = None
     ) -> None:
