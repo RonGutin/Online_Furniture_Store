@@ -1,9 +1,8 @@
 import pytest
 from app.models.EnumsClass import OrderStatus
 from app.models.ShoppingCart import ShoppingCart
-from app.models.inventory import Inventory
 from app.models.order import Order
-
+from app import utils
 
 class DummyQuery:
     def __init__(self):
@@ -15,7 +14,6 @@ class DummyQuery:
     def update(self, values):
         self.updated = True
         return 1
-
 
 class DummySession:
     def __init__(self):
@@ -29,7 +27,7 @@ class DummySession:
         self.committed = True
 
     def refresh(self, obj):
-        obj.id = 1  # סימולציה של ID
+        obj.id = 1
 
     def query(self, model):
         return DummyQuery()
@@ -40,28 +38,20 @@ class DummySession:
     def close(self):
         pass
 
-
 @pytest.fixture(autouse=True)
 def patch_session_local(monkeypatch):
     """
     מחליף את SessionLocal כך שיחזיר DummySession
     במקום אובייקט Session אמיתי.
     """
-
     def _dummy_session_local():
         return DummySession()
-
-    # שים לב לאותיות קטנות "order" במקום "Order"
     monkeypatch.setattr("app.models.order.SessionLocal", _dummy_session_local)
-
 
 @pytest.fixture(autouse=True)
 def patch_inventory(monkeypatch):
-    """ """
-    monkeypatch.setattr(
-        Inventory, "get_index_furniture_by_values", lambda self, item: 10
-    )
-
+    # Patch לפונקציה get_index_furniture_by_values מהמודול utils
+    monkeypatch.setattr(utils, "get_index_furniture_by_values", lambda self, item: 10)
 
 class DummyFurniture:
     def __init__(self, price):
@@ -84,30 +74,26 @@ class DummyFurniture:
     def Print_matching_product_advertisement(self):
         print("*** SPECIAL OFFER !!! ***\nSome advertisement text")
 
-
 @pytest.fixture
 def dummy_cart():
     cart = ShoppingCart()
     dummy_furniture = DummyFurniture(1000)
-    # נשתמש במבנה של cart.items = {item: amount}
     cart.items = {dummy_furniture: 2}
     cart.get_total_price = lambda: sum(
         f.get_price() * amt for f, amt in cart.items.items()
     )
     return cart
 
-
 def test_order_creation(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
     assert order.user_mail == "test@example.com"
-    assert order.total_price == 2000  # 1000 * 2
+    assert order.total_price == 2000
     assert order.coupon_id == 42
     assert order.status == OrderStatus.PENDING.value
     assert order.id == 1
     assert isinstance(order.items, dict)
     for item, amount in order.items.items():
         assert amount == 2
-
 
 def test_update_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
@@ -116,19 +102,17 @@ def test_update_status(dummy_cart):
     expected_status = OrderStatus(initial_status + 1).value
     assert order.status == expected_status
 
-
 def test_update_status_already_delivered(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
     order.status = OrderStatus.DELIVERED.value
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
         order.update_status()
-
+    assert "Order is already in final status (DELIVERED)" in str(exc_info.value)
 
 def test_get_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
     expected_status_name = OrderStatus(order.status).name
     assert order.get_status() == expected_status_name
-
 
 def test_order_repr(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)

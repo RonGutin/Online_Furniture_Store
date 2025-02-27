@@ -89,9 +89,7 @@ def test_add_item_valid_and_ad_print(
 ):
     mock_db = MagicMock()
     mock_session.return_value = mock_db
-    mock_db.query.return_value.filter.return_value.first.return_value = (
-        10,
-    )  # מסמל שיש כמות במלאי
+    mock_db.query.return_value.filter.return_value.first.return_value = (10,)
 
     furniture_items["dining_table"].check_availability = MagicMock(return_value=True)
 

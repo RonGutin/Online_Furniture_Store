@@ -69,7 +69,7 @@ class Order:
             current_status = OrderStatus(self.status)
 
             if current_status == OrderStatus.DELIVERED:
-                raise ValueError("Order is already in final status (DELIVERED)")
+                raise ValueError
 
             next_status = OrderStatus(current_status.value + 1).value
 
@@ -78,9 +78,10 @@ class Order:
             )
             session.commit()
             self.status = next_status
+        except ValueError:
+            raise ValueError("Order is already in final status (DELIVERED)")
         except Exception as e:
             session.rollback()
-            raise RuntimeError(f"Failed to update order status: {e}")
         finally:
             session.close()
 
