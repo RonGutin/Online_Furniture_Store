@@ -329,10 +329,14 @@ class BasicUser(ABC):
             ValueError: If the email format is invalid
         """
         self.name = name
-        self.email = self._validate_email(email)
-        self.password = password  # Already hashed by Authentication
+        self.email = self.__validate_email(email)
+        self.__password = password  # Already hashed by Authentication
 
-    def _validate_email(self, email: str) -> str:
+    @property
+    def password(self):
+        return self.__password
+    
+    def __validate_email(self, email: str) -> str:
         """
         Validate email format using regex.
 
@@ -402,10 +406,14 @@ class User(BasicUser):
         """
         super().__init__(name, email, password)
         self.address = address
-        self.credit = credit
+        self.__credit = credit
         self.cart = ShoppingCart()
-        self.orders: List[Order] = []
+        self._orders: List[Order] = []
 
+    @property
+    def credit(self):
+        return self.__credit
+    
     def update_user_details(
         self, address: Optional[str] = None, name: Optional[str] = None
     ) -> None:
@@ -469,7 +477,7 @@ class User(BasicUser):
                 raise ValueError
 
             user_db.credit += credit
-            self.credit = user_db.credit
+            self.__credit = user_db.credit
             session.commit()
         except ValueError:
             session.rollback()
@@ -496,7 +504,7 @@ class User(BasicUser):
         Returns:
             List[Order]: List of Order objects associated with the user
         """
-        return self.orders
+        return self._orders
 
     def set_password(self, new_password: str) -> None:
         """
@@ -540,10 +548,10 @@ class User(BasicUser):
                 total_price = self.cart.get_total_price()
                 coupon_id = None
 
-            if self.credit:
-                if self.credit <= total_price:
-                    total_price -= self.credit
-                    self.update_credit(self.credit * -1)
+            if self.__credit:
+                if self.__credit <= total_price:
+                    total_price -= self.__credit
+                    self.update_credit(self.__credit * -1)
                 else:
                     self.update_credit(total_price * -1)
                     total_price = 0
@@ -558,7 +566,7 @@ class User(BasicUser):
                 raise ValueError("Invalid Credit Card")
 
             new_order = Order(self.email, self.cart, coupon_id)
-            self.orders.append(new_order)
+            self._orders.append(new_order)
             ans = True
 
         except Exception as e:
