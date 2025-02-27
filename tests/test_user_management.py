@@ -231,7 +231,7 @@ class TestAuthentication:
         mock_user = MagicMock()
         mock_user.email = "john@example.com"
         mock_user.address = "123 Main St"
-        mock_user.credit = 50.0
+        mock_user._User__credit = 50.0
 
         mock_session.query.side_effect = lambda cls: MagicMock(
             filter=lambda *args: MagicMock(
@@ -250,7 +250,7 @@ class TestAuthentication:
         assert user.name == "John Doe"
         assert user.email == "john@example.com"
         assert user.address == "123 Main St"
-        assert user.credit == 50.0
+        assert user._User__credit == 50.0
 
     @patch("app.models.Users.SessionLocal")
     def test_sign_in_manager_success(
@@ -421,7 +421,7 @@ class TestBasicUser:
         ]
 
         for email in valid_emails:
-            assert user._validate_email(email) == email.lower()
+            assert user.__validate_email(email) == email.lower()
 
     def test_validate_email_invalid(self):
         """Test validation of invalid email addresses"""
@@ -437,7 +437,7 @@ class TestBasicUser:
 
         for email in invalid_emails:
             with pytest.raises(ValueError, match="Invalid email format"):
-                user._validate_email(email)
+                user.__validate_email(email)
 
 
 # Test for User class
@@ -452,9 +452,9 @@ class TestUser:
         assert user.email == "john@example.com"
         assert user.password == hashed_password
         assert user.address == "123 Main St"
-        assert user.credit == 100.0
+        assert user._User__credit == 100.0
         assert isinstance(user.cart, ShoppingCart)
-        assert user.orders == []
+        assert user._orders == []
 
     @patch("app.models.Users.SessionLocal")
     def test_update_user_details(self, mock_session_local, mock_session, mock_user):
@@ -557,7 +557,7 @@ class TestUser:
         mock_user.update_credit(50.0)
 
         assert mock_user_db.credit == 150.0
-        assert mock_user.credit == 150.0
+        assert mock_user._User__credit == 150.0
         assert mock_session.commit.call_count == 1
 
         # Subtract credit
@@ -567,7 +567,7 @@ class TestUser:
         mock_user.update_credit(-30.0)
 
         assert mock_user_db.credit == 120.0
-        assert mock_user.credit == 120.0
+        assert mock_user._User__credit == 120.0
         assert mock_session.commit.call_count == 1
 
     @patch("app.models.Users.SessionLocal")
@@ -619,7 +619,7 @@ class TestUser:
         # Add some orders
         mock_order1 = MagicMock(spec=Order)
         mock_order2 = MagicMock(spec=Order)
-        mock_user.orders = [mock_order1, mock_order2]
+        mock_user._orders = [mock_order1, mock_order2]
 
         result = mock_user.get_order_hist()
 
@@ -650,7 +650,7 @@ class TestUser:
 
         # Replace user's cart and set up credit
         mock_user.cart = mock_cart
-        mock_user.credit = 50.0
+        mock_user._User__credit = 50.0
         mock_user.update_credit = MagicMock()
 
         # Mock inventory
@@ -664,7 +664,7 @@ class TestUser:
 
                 assert result is True
                 # Check if order was added to user's orders
-                assert mock_order in mock_user.orders
+                assert mock_order in mock_user._orders
                 # Verify credit was used
                 assert mock_user.update_credit.call_count == 1
                 assert mock_user.update_credit.call_args[0][0] == -50.0
@@ -672,7 +672,7 @@ class TestUser:
                 assert mock_inventory.update_amount_in_inventory.call_count == 2
 
                 # Clear state for the next test
-                mock_user.orders = []
+                mock_user._orders = []
                 mock_user.update_credit.reset_mock()
                 mock_inventory.update_amount_in_inventory.reset_mock()
 
@@ -683,7 +683,7 @@ class TestUser:
 
                     assert result is True
                     # Check if order was added
-                    assert mock_order2 in mock_user.orders
+                    assert mock_order2 in mock_user._orders
                     # Verify coupon was processed
                     assert mock_cart.get_coupon_discount_and_id.call_count == 1
                     assert (
