@@ -47,8 +47,10 @@ def patch_session_local(monkeypatch):
     מחליף את SessionLocal כך שיחזיר DummySession
     במקום אובייקט Session אמיתי.
     """
+
     def _dummy_session_local():
         return DummySession()
+
     monkeypatch.setattr("app.models.order.SessionLocal", _dummy_session_local)
 
 
@@ -108,8 +110,12 @@ def test_update_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
     initial_status = order.get_status()  # מחזיר את שם הסטטוס
     order.update_status()
-    expected_status = OrderStatus[initial_status].value + 1  # המרת שם הסטטוס לערך מספרי +1
-    assert order.get_status() == OrderStatus(expected_status).name  # בדיקה מול שם הסטטוס החדש
+    expected_status = (
+        OrderStatus[initial_status].value + 1
+    )  # המרת שם הסטטוס לערך מספרי +1
+    assert (
+        order.get_status() == OrderStatus(expected_status).name
+    )  # בדיקה מול שם הסטטוס החדש
 
 
 def test_update_status_already_delivered(dummy_cart):

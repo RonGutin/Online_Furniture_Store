@@ -4,11 +4,6 @@ from typing import Optional
 from app.data.DbConnection import OrdersDB, OrderContainsItemDB, SessionLocal
 from app.models.EnumsClass import OrderStatus
 from app.models.ShoppingCart import ShoppingCart
-from app.data.DbConnection import (
-    SessionLocal,
-    OrdersDB,
-    OrderContainsItemDB,
-)
 from app.utils import get_index_furniture_by_values
 
 
@@ -29,7 +24,7 @@ class Order:
         self._id: Optional[int] = None
 
         self._save_to_db()
-    
+
     def get_user_mail(self) -> str:
         return self._user_mail
 
@@ -44,7 +39,7 @@ class Order:
 
     def get_status(self) -> str:
         return OrderStatus(self._status).name
-    
+
     def set_status(self, status: str = OrderStatus.PENDING) -> None:
         self._status = status
 

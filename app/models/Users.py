@@ -282,9 +282,9 @@ class User(BasicUser):
         return (
             f"User: Name ={self.name}, Email={self.email},"
             f"Address={self.address}, Credit={self.credit}"
-            )
+        )
 
-          
+
 class Manager(BasicUser):
     """
     Manager class for administrative operations in the furniture store.
