@@ -290,7 +290,7 @@ class User(BasicUser):
         return (
             f"User: Name ={self.name}, Email={self.email},"
             f"Address={self.address}, Credit={self.credit}"
-          )
+        )
 
 
 class Manager(BasicUser):
