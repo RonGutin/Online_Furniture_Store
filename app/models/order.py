@@ -43,7 +43,7 @@ class Order:
 
         self.__user_mail: str = user_mail
         self.total_price: float = cart.get_total_price()
-        self.status: str = OrderStatus.PENDING.value
+        self._status: str = OrderStatus.PENDING.value
         self.items: list = deepcopy(cart.items)
         self.coupon_id: Optional[int] = coupon_id
         self.id: Optional[int] = None
@@ -61,7 +61,7 @@ class Order:
         session = SessionLocal()
         try:
             order_db = OrdersDB(
-                Ostatus=self.status,
+                Ostatus=self._status,
                 UserEmail=self.__user_mail,
                 idCouponsCodes=self.coupon_id,
             )
@@ -96,7 +96,7 @@ class Order:
         """
         session = SessionLocal()
         try:
-            current_status = OrderStatus(self.status)
+            current_status = OrderStatus(self._status)
 
             if current_status == OrderStatus.DELIVERED:
                 raise ValueError
@@ -107,7 +107,7 @@ class Order:
                 {"Ostatus": next_status}
             )
             session.commit()
-            self.status = next_status
+            self._status = next_status
 
         except ValueError:
             raise ValueError("Order is already in final status (DELIVERED)")
@@ -120,11 +120,15 @@ class Order:
 
     def get_status(self) -> str:
         """Returns the order status as a string."""
-        return OrderStatus(self.status).name
+        return OrderStatus(self._status).name
+    
+    def set_status(self, status: str = OrderStatus.PENDING) -> None:
+        """Seta the order status."""
+        self._status = status
 
     def __repr__(self) -> str:
         """Returns a string representation of the order."""
         return (
             f"Order(id = {self.id}, User email = {self.__user_mail}, "
-            f"Total price = {self.total_price:.2f}$, Status = {OrderStatus(self.status).name})"
+            f"Total price = {self.total_price:.2f}$, Status = {OrderStatus(self._status).name})"
         )
