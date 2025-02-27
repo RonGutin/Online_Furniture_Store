@@ -21,6 +21,6 @@ htmlcov/
 # GitHub Actions directory (if containing sensitive information)
 .github/workflows/
 
-# Dependencies installed via pip
+# Dependencies installed via pip.
 env/
 venv/
