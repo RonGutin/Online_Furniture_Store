@@ -1,5 +1,6 @@
 import bcrypt
 from typing import Union, Optional
+
 from app.data.DbConnection import SessionLocal, BasicUserDB, UserDB, ManagerDB
 from app.models.Users import User, Manager
 
@@ -99,7 +100,9 @@ class Authentication:
         finally:
             session.close()
 
-    def create_manager(self, name: str, email: str, password: str) -> Optional[Manager]:
+    def create_manager(
+        self, name: str, email: str, password: str
+    ) -> Optional["Manager"]:
         """
         Create a new manager in the database.
 
@@ -109,7 +112,7 @@ class Authentication:
             password (str): Manager's plain text password (will be hashed)
 
         Returns:
-            Optional[Manager]: A new Manager object if successful, None if error occurs
+            Optional['Manager']: A new Manager object if successful, None if error occurs
         """
         session = SessionLocal()
         try:

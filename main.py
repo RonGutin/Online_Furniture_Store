@@ -9,20 +9,20 @@ Important - this file is temporary until we build a real main file
 
 def main():
     dining_table = DiningTable(
-        name="Elegant Dining Table",
-        description="A spacious dining table made from premium oak wood.",
-        price=500.00,
-        dimensions=(200, 100, 75),
+        # name="Elegant Dining Table",
+        # description="A spacious dining table made from premium oak wood.",
+        # price=500.00,
+        # dimensions=(200, 100, 75),
         color="Brown",
-        material="Oak Wood",
+        material="Wood",
     )
 
     gaming_chair = GamingChair(
-        name="Pro Gamer Chair",
-        description="An ergonomic gaming chair with adjustable height and armrests.",
-        price=175.00,
-        dimensions=(50, 50, 120),
-        color="Red",
+        # name="Pro Gamer Chair",
+        # description="An ergonomic gaming chair with adjustable height and armrests.",
+        # price=175.00,
+        # dimensions=(50, 50, 120),
+        color="Black",
         is_adjustable=True,
         has_armrest=True,
     )
@@ -82,12 +82,15 @@ def main():
     # except ValueError as e:
     #     print(e)
 
-    print("\n=== Removing an item ===")
-    cart.remove_item(dining_table)
-    print(cart)
+    # print("\n=== Removing an item ===")
+    # cart.remove_item(dining_table)
+    # print(cart)
 
-    print("\n=== Removing an item not in the cart ===")
+    # print("\n=== Removing an item not in the cart ===")
     try:
         cart.remove_item(dining_table)
     except ValueError as e:
         print(e)
+
+
+main()

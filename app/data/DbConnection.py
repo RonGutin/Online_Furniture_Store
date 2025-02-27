@@ -1,7 +1,5 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.sql import text
 from sqlalchemy import (
+    create_engine,
     Column,
     Integer,
     String,
@@ -9,9 +7,12 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
 )
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.sql import text
+
 
 DATABASE_USERNAME = "root"
-DATABASE_PASSWORD = "RAZRAZ123"
+DATABASE_PASSWORD = "RAZRAZ123"  # "HaHa12345!"
 DATABASE_HOST = "localhost"
 DATABASE_PORT = "3306"
 DATABASE_NAME = "FinalProjectDB"

@@ -281,10 +281,10 @@ class User(BasicUser):
         """
         return (
             f"User: Name ={self.name}, Email={self.email},"
-            f" Address={self.address}, Credit={self.credit}"
-        )
+            f"Address={self.address}, Credit={self.credit}"
+            )
 
-
+          
 class Manager(BasicUser):
     """
     Manager class for administrative operations in the furniture store.
@@ -367,7 +367,7 @@ class Manager(BasicUser):
             password (str): New manager's plain text password
 
         Returns:
-            Optional[Manager]: New Manager object if successful, None otherwise
+            Optional['Manager']: New Manager object if successful, None otherwise
         """
         return Authentication().create_manager(name, email, password)
 

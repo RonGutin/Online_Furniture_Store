@@ -1,17 +1,19 @@
 import re
 from typing import Optional
-from app.data.DbConnection import SessionLocal, InventoryDB
 from sqlalchemy import and_
 
+from app.data.DbConnection import SessionLocal, InventoryDB
 
-def transform_pascal_to_snake(text):
-    """_summary_
+
+def transform_pascal_to_snake(text: str) -> str:
+    """
+    Converts a PascalCase string to SNAKE_CASE.
 
     Args:
-        text (_type_): _description_
+        text (str): The PascalCase string.
 
     Returns:
-        _type_: _description_
+        str: The converted SNAKE_CASE string.
     """
     text = re.sub(r"([a-z])([A-Z])", r"\1_\2", text)
     return text.upper()
@@ -19,16 +21,20 @@ def transform_pascal_to_snake(text):
 
 def get_index_furniture_by_values(item) -> Optional[int]:
     """
-    Retrieves the index (ID) of a furniture item in
-    InventoryDB based on its attributes.
+    Retrieves the index (ID) of a furniture item in InventoryDB based on its attributes.
+
+    Args:
+        item: An instance of a furniture class.
+
     Returns:
-        - The ID if found.
-        - None if no match exists.
+        Optional[int]: The ID if found, otherwise None.
     """
     if item is None:
         print("Error: item is None")
         return None
-    ans = None
+
+    ans: Optional[int] = None
+
     try:
         furniture_type = transform_pascal_to_snake(item.__class__.__name__)
 
@@ -57,5 +63,4 @@ def get_index_furniture_by_values(item) -> Optional[int]:
         print(f"Error fetching data: {e}")
 
     finally:
-        session.close()
         return ans
