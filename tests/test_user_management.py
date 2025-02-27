@@ -250,7 +250,7 @@ class TestAuthentication:
         assert user.name == "John Doe"
         assert user.email == "john@example.com"
         assert user.address == "123 Main St"
-        assert user._User__credit == 50.0
+        assert user.credit == 50.0
 
     @patch("app.models.Users.SessionLocal")
     def test_sign_in_manager_success(
@@ -421,7 +421,7 @@ class TestBasicUser:
         ]
 
         for email in valid_emails:
-            assert user.__validate_email(email) == email.lower()
+            assert user._BasicUser__validate_email(email) == email.lower()
 
     def test_validate_email_invalid(self):
         """Test validation of invalid email addresses"""
@@ -437,7 +437,7 @@ class TestBasicUser:
 
         for email in invalid_emails:
             with pytest.raises(ValueError, match="Invalid email format"):
-                user.__validate_email(email)
+                user._BasicUser__validate_email(email)
 
 
 # Test for User class
