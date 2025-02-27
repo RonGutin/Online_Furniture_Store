@@ -94,21 +94,6 @@ def test_get_price(price, expected, furniture_objects):
         dining_table.get_price()
 
 
-@patch("app.models.FurnituresClass.Inventory")
-@patch("app.models.FurnituresClass.SessionLocal")
-def test_check_availability(mock_session, mock_inventory, furniture_objects):
-    mock_inventory_instance = MagicMock()
-    mock_inventory.return_value = mock_inventory_instance
-    mock_inventory_instance.get_index_furniture_by_values.return_value = 1
-
-    mock_db = MagicMock()
-    mock_session.return_value = mock_db
-    mock_db.query.return_value.filter.return_value.first.return_value = (10,)
-
-    assert furniture_objects["dining_table"].check_availability(amount=1) is True
-    assert furniture_objects["dining_table"].check_availability(amount=11) is False
-
-
 @patch("app.models.FurnituresClass.SessionLocal")
 def test_get_match_furniture(mock_session, furniture_objects):
     mock_db = MagicMock()

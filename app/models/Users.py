@@ -279,7 +279,10 @@ class User(BasicUser):
         Returns:
             str: String representation of the user
         """
-        return f"User: Name ={self.name}, Email={self.email}, Address={self.address}, Credit={self.credit}"
+        return (
+            f"User: Name ={self.name}, Email={self.email},"
+            f"Address={self.address}, Credit={self.credit}"
+        )
 
 
 class Manager(BasicUser):
@@ -354,7 +357,7 @@ class Manager(BasicUser):
         Authentication().set_new_password(self, new_password)
         return
 
-    def add_manager(self, name: str, email: str, password: str) -> Optional[Manager]:
+    def add_manager(self, name: str, email: str, password: str) -> Optional["Manager"]:
         """
         Add a new manager to the system.
 
@@ -364,7 +367,7 @@ class Manager(BasicUser):
             password (str): New manager's plain text password
 
         Returns:
-            Optional[Manager]: New Manager object if successful, None otherwise
+            Optional['Manager']: New Manager object if successful, None otherwise
         """
         return Authentication().create_manager(name, email, password)
 

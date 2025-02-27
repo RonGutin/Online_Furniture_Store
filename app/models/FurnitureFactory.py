@@ -1,3 +1,4 @@
+from typing import Optional, Union
 from app.models.EnumsClass import (
     FurnitureType,
 )  # Import FurnitureType from the enums module
@@ -11,17 +12,35 @@ from app.models.FurnituresClass import (
 
 
 class FurnitureFactory:
-    _instance = None  # Singleton instance
+    """
+    Singleton factory class responsible for creating furniture objects.
+    """
 
-    def __new__(cls):
+    _instance: Optional["FurnitureFactory"] = None
+
+    def __new__(cls) -> "FurnitureFactory":
+        """
+        Ensures that only one instance of FurnitureFactory exists.
+        """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def create_furniture(self, furniture_type: str, **kwargs):
+    def create_furniture(
+        self, furniture_type: str, **kwargs
+    ) -> Union[DiningTable, WorkDesk, CoffeeTable, WorkChair, GamingChair]:
         """
-        A function that creates a piece of furniture.
-        Type the desired piece of furniture in the format appropriate for an Enum
+        Creates a furniture object based on the given furniture type.
+
+        Args:
+            furniture_type (str): The type of furniture to create.
+            **kwargs: Additional arguments for the furniture object.
+
+        Returns:
+            An instance of the appropriate furniture class.
+
+        Raises:
+            ValueError: If the furniture type is unknown.
         """
         try:
             enum_type = FurnitureType[furniture_type.upper()]
