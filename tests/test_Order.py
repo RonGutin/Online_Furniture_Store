@@ -95,7 +95,7 @@ def dummy_cart():
 
 def test_order_creation(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
-    assert order.user_mail == "test@example.com"
+    assert order.get_user_mail() == "test@example.com"
     assert order.total_price == 2000
     assert order.coupon_id == 42
     assert order.status == OrderStatus.PENDING.value

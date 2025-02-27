@@ -41,7 +41,7 @@ class Order:
         if not isinstance(cart, ShoppingCart):
             raise ValueError("Invalid cart. Must be an instance of ShoppingCart.")
 
-        self.user_mail: str = user_mail
+        self.__user_mail: str = user_mail
         self.total_price: float = cart.get_total_price()
         self.status: str = OrderStatus.PENDING.value
         self.items: list = deepcopy(cart.items)
@@ -49,6 +49,12 @@ class Order:
         self.id: Optional[int] = None
 
         self._save_to_db()
+    
+    def get_user_mail(self) -> str:
+        return self.__user_mail
+
+    def set_user_mail(self, user_mail: str) -> None:
+        self.__user_mail = user_mail
 
     def _save_to_db(self) -> None:
         """Saves the order to the database"""
@@ -56,7 +62,7 @@ class Order:
         try:
             order_db = OrdersDB(
                 Ostatus=self.status,
-                UserEmail=self.user_mail,
+                UserEmail=self.__user_mail,
                 idCouponsCodes=self.coupon_id,
             )
             session.add(order_db)
@@ -119,6 +125,6 @@ class Order:
     def __repr__(self) -> str:
         """Returns a string representation of the order."""
         return (
-            f"Order(id = {self.id}, User email = {self.user_mail}, "
+            f"Order(id = {self.id}, User email = {self.__user_mail}, "
             f"Total price = {self.total_price:.2f}$, Status = {OrderStatus(self.status).name})"
         )
