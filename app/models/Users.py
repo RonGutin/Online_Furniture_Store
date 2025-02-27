@@ -48,7 +48,7 @@ class BasicUser(ABC):
     @property
     def password(self):
         return self.__password
-    
+
     def __validate_email(self, email: str) -> str:
         """
         Validate email format using regex.
@@ -122,7 +122,7 @@ class User(BasicUser):
         self.__credit = credit
         self.cart = ShoppingCart()
         self._orders: List[Order] = []
-    
+
     @property
     def credit(self):
         return self.__credit

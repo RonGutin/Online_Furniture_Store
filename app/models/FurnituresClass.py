@@ -134,7 +134,7 @@ class Furniture(ABC):
             raise ValueError("Price is not set yet.")
 
         return self._price
-    
+
     def set_price(self, price: float) -> None:
         self._price = price
 
