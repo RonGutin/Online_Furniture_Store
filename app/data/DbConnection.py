@@ -13,8 +13,8 @@ from sqlalchemy.sql import text
 
 DATABASE_USERNAME = "root"
 DATABASE_PASSWORD = "RAZRAZ123"
-DATABASE_HOST = "mysql-container"
-DATABASE_PORT = "3307"
+DATABASE_HOST = "localhost"
+DATABASE_PORT = "3306"
 DATABASE_NAME = "FinalProjectDB"
 
 DATABASE_URL = (
