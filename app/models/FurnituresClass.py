@@ -77,10 +77,16 @@ class Furniture(ABC):
         Raises:
             ValueError: If the discount percentage is negative.
         """
+        if not isinstance(discount_percentage, (int, float)):
+            raise TypeError(
+                "discount_percentage must be an integer or float between 0 and 100"
+            )
+        if discount_percentage < 0 or discount_percentage > 100:
+            raise ValueError(
+                "discount_percentage must be an integer or float between 0 and 100"
+            )
         if discount_percentage >= 100:
             return 0
-        if discount_percentage < 0:
-            raise ValueError("Discount percentage cannot be negative.")
 
         return self._price * (1 - 0.01 * discount_percentage)
 
@@ -136,6 +142,12 @@ class Furniture(ABC):
         return self._price
 
     def set_price(self, price: float) -> None:
+        if price is None:
+            raise ValueError("Price cannot be None.")
+        if not isinstance(price, (int, float)):
+            raise TypeError("price must be a number.")
+        if price < 0:
+            raise ValueError("price must be a positive number.")
         self._price = price
 
     def _get_info_furniture_by_key(self) -> Tuple[int, str, str]:

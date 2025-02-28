@@ -34,6 +34,8 @@ class ShoppingCart:
             Tuple[int, Optional[int]]: A tuple containing the discount (int)
             and coupon ID (int or None if not found).
         """
+        if not isinstance(coupon_code, str):
+            raise TypeError("Coupon code must be a string")
 
         discount: int = 0
         id_coupon: Optional[int] = None
@@ -62,6 +64,8 @@ class ShoppingCart:
 
     def apply_discount(self, Discount_percentage: int) -> float:
         """Apply a discount on the shopping cart for all items."""
+        if not isinstance(Discount_percentage, int):
+            raise TypeError("Discount percentage must be an integer")
         return sum(
             item[0].calculate_discount(Discount_percentage) * item[1]
             for item in self.items
@@ -80,6 +84,11 @@ class ShoppingCart:
             bool: True if the item was successfully added or updated in the cart,
                 False otherwise.
         """
+        if not isinstance(furniture, Furniture):
+            raise TypeError("Furniture must be an instance of Furniture class")
+
+        if not isinstance(amount, int):
+            raise ValueError("Amount must be an integer")
 
         # Validate the amount
         if amount < 1 or not isinstance(amount, int):
@@ -122,6 +131,8 @@ class ShoppingCart:
         Raises:
             ValueError: If the furniture item is not in the cart.
         """
+        if not isinstance(furniture, Furniture):
+            raise TypeError("Furniture must be an instance of Furniture class")
 
         is_in_items: bool = False
 

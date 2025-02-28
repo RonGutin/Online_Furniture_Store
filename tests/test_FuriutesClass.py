@@ -89,9 +89,8 @@ def test_get_price(price, expected, furniture_objects):
     dining_table.set_price(price)
     assert dining_table.get_price() == expected
 
-    dining_table.set_price(None)
-    with pytest.raises(ValueError):
-        dining_table.get_price()
+    with pytest.raises(ValueError, match="Price cannot be None."):
+        dining_table.set_price(None)
 
 
 @patch("app.models.FurnituresClass.SessionLocal")

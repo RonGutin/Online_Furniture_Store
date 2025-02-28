@@ -11,7 +11,7 @@ from app.utils import transform_pascal_to_snake, get_index_furniture_by_values
 class Inventory:
     """Singleton class for managing inventory."""
 
-    instance: Optional["Inventory"] = None
+    _instance: Optional["Inventory"] = None
 
     def __new__(cls) -> "Inventory":
         """Ensures only one instance of Inventory exists (Singleton pattern)."""
@@ -31,18 +31,23 @@ class Inventory:
             sign (bool): If True, increases quantity; if False, decreases it.
 
         """
+        if item is not None and not hasattr(item, "__class__"):
+            raise TypeError("Invalid item: Expected an object with a class type.")
         if item is None:
-            print("Error: No item provided.")
-            return
+            raise TypeError("Error: No item provided.")
+        if not isinstance(quantity, int):
+            raise TypeError("quantity must be a number.")
+        if not isinstance(sign, bool):
+            raise TypeError("sign must be a True/False.")
 
         furniture_type: str = transform_pascal_to_snake(item.__class__.__name__)
         f_type_enum: int = FurnitureType[furniture_type].value
 
-        self.update_furniture_amount_in_DB(item, quantity, f_type_enum, sign)
+        self.update_furniture_amount_in_db(item, quantity, f_type_enum, sign)
 
     def update_furniture_amount_in_db(
         self, item: str, quantity: int, f_type_enum: int, sign: bool
-    ) -> None:
+    ) -> None:  # calls from "update_amount_in_inventory" - validation before calling
         """
         Updates the quantity field for a specific furniture item (Chair/Table) in the InventoryDB.
 
@@ -97,6 +102,11 @@ class Inventory:
         Raises:
             ValueError: If the column does not exist in the table.
         """
+        if not isinstance(column, str):
+            raise TypeError("Expected column to be a string.")
+        if not isinstance(column_value, str):
+            raise TypeError("Expected column_value to be a string.")
+
         ans: Response | None = None
         try:
             with SessionLocal() as session:
@@ -131,6 +141,12 @@ class Inventory:
             Response | None: A Flask Response object in JSON format,
             or None if no matching data is found.
         """
+
+        if not isinstance(min_price, (int, float)):
+            raise TypeError("Expected min_price to be a number.")
+        if not isinstance(max_price, (int, float)):
+            raise TypeError("Expected max_price to be a number.")
+
         ans: Response | None = None  # Declaring ans with the correct type hint
 
         try:
