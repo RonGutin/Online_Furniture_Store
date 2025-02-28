@@ -18,6 +18,8 @@ __pycache__/
 .coverage
 htmlcov/
 
+# GitHub Actions directory (if containing sensitive information)
+.github/workflows/
 
 # Dependencies installed via pip.
 env/

@@ -13,8 +13,12 @@ class Order:
     def __init__(
         self, user_mail: str, cart: ShoppingCart, coupon_id: Optional[int] = None
     ) -> None:
+        if not isinstance(user_mail, str):
+            raise TypeError("user_mail must be a string.")
         if not isinstance(cart, ShoppingCart):
-            raise ValueError("Invalid cart. Must be an instance of ShoppingCart.")
+            raise TypeError("cart must be an instance of ShoppingCart.")
+        if coupon_id is not None and not isinstance(coupon_id, int):
+            raise TypeError("coupon_id must be an integer or None.")
 
         self._user_mail: str = user_mail
         self._total_price: float = cart.get_total_price()
@@ -29,36 +33,50 @@ class Order:
         return self._user_mail
 
     def set_user_mail(self, user_mail: str) -> None:
+        if not isinstance(user_mail, str):
+            raise TypeError("user_mail must be a string.")
         self._user_mail = user_mail
 
     def get_total_price(self) -> float:
         return self._total_price
 
     def set_total_price(self, total_price: float) -> None:
+        if not isinstance(total_price, (int, float)):
+            raise TypeError("total_price must be a number.")
         self._total_price = total_price
 
     def get_status(self) -> str:
         return OrderStatus(self._status).name
 
     def set_status(self, status: str = OrderStatus.PENDING) -> None:
+        if not isinstance(status, int):
+            raise TypeError("status must be a int.")
+        if status not in OrderStatus._value2member_map_:
+            raise ValueError("Invalid status value.")
         self._status = status
 
     def get_items(self) -> list:
         return self._items
 
     def set_items(self, items: list) -> None:
+        if not isinstance(items, list):
+            raise TypeError("items must be a list.")
         self._items = items
 
     def get_coupon_id(self) -> Optional[int]:
         return self._coupon_id
 
     def set_coupon_id(self, coupon_id: Optional[int]) -> None:
+        if coupon_id is not None and not isinstance(coupon_id, int):
+            raise TypeError("coupon_id must be an integer or None.")
         self._coupon_id = coupon_id
 
     def get_id(self) -> Optional[int]:
         return self._id
 
     def set_id(self, order_id: Optional[int]) -> None:
+        if order_id is not None and not isinstance(order_id, int):
+            raise TypeError("order_id must be an integer or None.")
         self._id = order_id
 
     def _save_to_db(self) -> None:
@@ -110,8 +128,9 @@ class Order:
         except ValueError:
             raise ValueError("Order is already in final status (DELIVERED)")
 
-        except Exception:
+        except Exception as es:
             session.rollback()
+            raise Exception(f"Error updating order status: {es}")
 
         finally:
             session.close()

@@ -42,6 +42,8 @@ class FurnitureFactory:
         Raises:
             ValueError: If the furniture type is unknown.
         """
+        if not isinstance(furniture_type, str):
+            raise TypeError("furniture_type must be an string")
         try:
             enum_type = FurnitureType[furniture_type.upper()]
         except KeyError:
