@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch
+from app.utils import transform_pascal_to_snake
 from app.models.FurnitureFactory import FurnitureFactory
 from app.models.FurnituresClass import (
     DiningTable,
@@ -75,3 +76,16 @@ def test_invalid_parameter_type(furniture_factory, furniture_type, color, materi
         furniture_factory.create_furniture(
             furniture_type, color=color, material=material
         )
+
+
+# Testing a function from the utils file
+def test_basic_transformation():
+    assert transform_pascal_to_snake("PascalCase") == "PASCAL_CASE"
+
+
+def test_single_word():
+    assert transform_pascal_to_snake("Hello") == "HELLO"
+
+
+def test_all_lowercase():
+    assert transform_pascal_to_snake("lowercase") == "LOWERCASE"
