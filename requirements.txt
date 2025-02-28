@@ -2,10 +2,12 @@
 
 flask
 pytest
+pytest-cov
 pylint
 black
 flake8
 ruff
+typeguard
 
 requests
 
