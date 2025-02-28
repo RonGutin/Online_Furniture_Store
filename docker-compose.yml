@@ -1,0 +1,24 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: "RAZRAZ123"
+      MYSQL_DATABASE: FinalProjectDB
+    ports:
+      - "3307:3307"
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql 
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 5s
+      retries: 3
+      timeout: 5s
+      start_period: 5s
+
+networks:
+  my_network:
+    driver: bridge

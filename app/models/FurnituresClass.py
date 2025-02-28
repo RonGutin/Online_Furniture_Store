@@ -115,7 +115,7 @@ class Furniture(ABC):
         session = None
         try:
             if key_f is None:
-                raise ValueError("There is no furniture key number.")
+                raise ValueError
             session = SessionLocal()
             row = (
                 session.query(InventoryDB.quantity)
@@ -124,7 +124,8 @@ class Furniture(ABC):
             )
             if row:
                 ans = row[0] >= amount
-
+        except ValueError:
+            ValueError("There is no furniture key number.")
         except Exception as ex:
             print(f"Error connecting to DB or fetching data: {ex}")
 

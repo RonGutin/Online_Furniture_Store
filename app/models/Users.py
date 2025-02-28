@@ -1,18 +1,305 @@
-from abc import ABC, abstractmethod
+import bcrypt
 import re
-from typing import Optional, List, Union
+from abc import ABC, abstractmethod
+from typing import Union, Optional, List
+from typeguard import typechecked
+
+from app.data.DbConnection import SessionLocal, BasicUserDB, UserDB, ManagerDB, OrdersDB
 from app.models.ShoppingCart import ShoppingCart
-from app.data.DbConnection import (
-    SessionLocal,
-    UserDB,
-    BasicUserDB,
-    OrdersDB,
-)
-from app.models.Authentication import Authentication
 from app.models.EnumsClass import OrderStatus
 from app.models.order import Order
 from app.models.inventory import Inventory
 from app.models.FurnituresClass import Chair, Table
+
+
+class Authentication:
+    """
+    Singleton class for handling user authentication operations.
+
+    This class provides methods for user authentication, registration,
+    password hashing and validation.
+    """
+
+    _instance = None
+
+    def __new__(cls) -> "Authentication":
+        """
+        Create or return the singleton instance of Authentication.
+
+        Returns:
+            Authentication: The singleton instance
+        """
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+
+        return cls._instance
+
+    def _hash_password(self, password: str) -> str:
+        """
+        Hash a password using bcrypt with salt.
+
+        Args:
+            password (str): The plain text password to hash
+
+        Returns:
+            str: The hashed password as a UTF-8 string
+        """
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        return hashed.decode("utf-8")
+
+    def validate_auth(self, password: str, hashed_password: str) -> bool:
+        """
+        Validate a password against its hashed version.
+
+        Args:
+            password (str): The plain text password to check
+            hashed_password (str): The hashed password to compare against
+
+        Returns:
+            bool: True if the password matches, False otherwise
+        """
+        return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
+
+    @typechecked
+    def create_user(
+        self, name: str, email: str, password: str, address: str, credit: float = 0
+    ) -> Optional["User"]:
+        """
+        Create a new user in the database and returns User instance.
+
+        Args:
+            name (str): User's name
+            email (str): User's email address
+            password (str): User's plain text password (will be hashed)
+            address (str): User's delivery address
+            credit (float, optional): User's initial credit. Defaults to 0.
+
+        Returns:
+            Optional[User]: A new User object if successful, None if error occurs
+
+        Raises:
+            ValueError: If any input values fail validation
+            TypeError: If any input types don't match expected types
+        """
+        # Custom validation for value constraints
+        if not name.strip():
+            raise ValueError("Name cannot be empty")
+        if not email.strip():
+            raise ValueError("Email cannot be empty")
+        if not password.strip():
+            raise ValueError("Password cannot be empty")
+        if len(password) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not address.strip():
+            raise ValueError("Address cannot be empty")
+        if credit < 0:
+            raise ValueError("Credit cannot be negative")
+
+        session = SessionLocal()
+        try:
+            existing_basic_user = (
+                session.query(BasicUserDB).filter(BasicUserDB.email == email).first()
+            )
+            if existing_basic_user:
+                print("This email already exists in BasicUserDB")
+                return None
+
+            hashed_password = self._hash_password(password)
+
+            basic_user_db = BasicUserDB(
+                Uname=name, email=email, Upassword=hashed_password
+            )
+
+            user_db = UserDB(email=email, address=address, credit=credit)
+
+            session.add(basic_user_db)
+            session.add(user_db)
+            session.commit()
+
+            return User(name, email, hashed_password, address, credit)
+
+        except Exception as e:
+            session.rollback()
+            print(f"Error creating user: {e}")
+            return None
+        finally:
+            session.close()
+
+    @typechecked
+    def create_manager(
+        self, name: str, email: str, password: str
+    ) -> Optional["Manager"]:
+        """
+        Create a new manager in the database.
+
+        Args:
+            name (str): Manager's name
+            email (str): Manager's email address
+            password (str): Manager's plain text password (will be hashed)
+
+        Returns:
+            Optional['Manager']: A new Manager object if successful, None if error occurs
+
+        Raises:
+            ValueError: If any input values fail validation
+            TypeError: If any input types don't match expected types
+        """
+        # Custom validation for value constraints
+        if not name.strip():
+            raise ValueError("Name cannot be empty")
+        if not email.strip():
+            raise ValueError("Email cannot be empty")
+        if not password.strip():
+            raise ValueError("Password cannot be empty")
+        if len(password) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+
+        session = SessionLocal()
+        try:
+            existing_basic_user = (
+                session.query(BasicUserDB).filter(BasicUserDB.email == email).first()
+            )
+            if existing_basic_user:
+                print("This email already exists in BasicUserDB")
+                return None
+
+            hashed_password = self._hash_password(password)
+
+            basic_manager_db = BasicUserDB(
+                Uname=name, email=email, Upassword=hashed_password
+            )
+
+            manager_db = ManagerDB(email=email)
+
+            session.add(basic_manager_db)
+            session.add(manager_db)
+            session.commit()
+
+            return Manager(name, email, hashed_password)
+
+        except Exception as e:
+            session.rollback()
+            print(f"Error creating manager: {e}")
+            return None
+        finally:
+            session.close()
+
+    @typechecked
+    def sign_in(self, email: str, password: str) -> Optional[Union["User", "Manager"]]:
+        """
+        Authenticate a user or manager by email and password.
+
+        Args:
+            email (str): The email address of the user/manager
+            password (str): The plain text password
+
+        Returns:
+            Optional[Union[User, Manager]]: A User or Manager object if authentication
+                                           is successful, None otherwise
+
+        Raises:
+            ValueError: If any input values fail validation
+            TypeError: If any input types don't match expected types
+        """
+        # Custom validation for value constraints
+        if not email.strip():
+            raise ValueError("Email cannot be empty")
+        if not password.strip():
+            raise ValueError("Password cannot be empty")
+
+        session = SessionLocal()
+        try:
+            basic_user = (
+                session.query(BasicUserDB).filter(BasicUserDB.email == email).first()
+            )
+
+            if not basic_user:
+                print("User does not exist")
+                return None
+
+            user = session.query(UserDB).filter(UserDB.email == email).first()
+            if user and self.validate_auth(password, basic_user.Upassword):
+                return User(
+                    basic_user.Uname,
+                    user.email,
+                    basic_user.Upassword,
+                    user.address,
+                    user.credit,
+                )
+
+            manager = session.query(ManagerDB).filter(ManagerDB.email == email).first()
+            if manager and self.validate_auth(password, basic_user.Upassword):
+                return Manager(basic_user.Uname, manager.email, basic_user.Upassword)
+
+            print("Invalid credentials or user/manager does not exist")
+            return None
+
+        except Exception as e:
+            session.rollback()
+            print(f"Error during login: {e}")
+            return None
+
+        finally:
+            session.close()
+
+    def set_new_password(
+        self, curr_basic_user: Union["User", "Manager"], new_password: str
+    ) -> None:
+        """
+        Update user's/manager's password in the database.
+
+        Args:
+            curr_basic_user (Union[User, Manager]): The user/manager to update
+            new_password (str): The new plain text password (will be hashed)
+
+        Raises:
+            ValueError: If user/manager not found in database
+            Exception: If an error occurs during password update
+        """
+        session = SessionLocal()
+        try:
+            basic_user_db = (
+                session.query(BasicUserDB)
+                .filter(BasicUserDB.email == curr_basic_user.email)
+                .first()
+            )
+            if not basic_user_db:
+                raise ValueError
+
+            hashed_password = self._hash_password(new_password)
+            basic_user_db.Upassword = hashed_password
+
+            session.commit()
+            print(f"Password successfully changed for:\n{curr_basic_user}")
+
+        except ValueError:
+            session.rollback()
+            raise ValueError("User/Manager not found in database")
+
+        except Exception as e:
+            session.rollback()
+            raise Exception(f"Error updating password: {e}")
+        finally:
+            session.close()
+
+    @staticmethod
+    def validate_credit_card(total_price: int, credit_card_num: int) -> bool:
+        """
+        Mock Validation of a credit card for payment.
+
+        Args:
+            total_price (int): The total price of the purchase
+            credit_card_num (int): The credit card number
+
+        Returns:
+            bool: True if the credit card is valid, False otherwise
+        """
+        if not total_price:
+            return True
+        if isinstance(credit_card_num, int):
+            return True
+        return False
 
 
 class BasicUser(ABC):
@@ -147,7 +434,7 @@ class User(BasicUser):
         try:
             user_db = session.query(UserDB).filter(UserDB.email == self.email).first()
             if not user_db:
-                raise ValueError("User not found in database")
+                raise ValueError
 
             basic_user_db = (
                 session.query(BasicUserDB)
@@ -163,6 +450,9 @@ class User(BasicUser):
                 self.name = name
 
             session.commit()
+        except ValueError:
+            session.rollback()
+            raise ValueError("User not found in database")
         except Exception as e:
             session.rollback()
             raise Exception(f"Error updating user details: {e}")
@@ -184,11 +474,14 @@ class User(BasicUser):
             session = SessionLocal()
             user_db = session.query(UserDB).filter(UserDB.email == self.email).first()
             if not user_db:
-                raise ValueError("User not found in database")
+                raise ValueError
 
             user_db.credit += credit
             self.__credit = user_db.credit
             session.commit()
+        except ValueError:
+            session.rollback()
+            raise ValueError("User not found in database")
         except Exception as e:
             session.rollback()
             raise Exception(f"Error updating credit: {e}")
@@ -253,6 +546,7 @@ class User(BasicUser):
                 total_price = self.cart.apply_discount(discount_percent)
             else:
                 total_price = self.cart.get_total_price()
+                coupon_id = None
 
             if self.__credit:
                 if self.__credit <= total_price:
@@ -394,10 +688,13 @@ class Manager(BasicUser):
         try:
             order_db = session.query(OrdersDB).filter(OrdersDB.id == order_id).first()
             if order_db.id == OrderStatus.DELIVERED:
-                raise ValueError(f"Order number {order_id} already delivered")
+                raise ValueError
             else:
                 order_db.Ostatus += 1
             session.commit()
+        except ValueError:
+            session.rollback()
+            raise ValueError(f"Order number {order_id} already delivered")
         except Exception as e:
             session.rollback()
             raise Exception(f"Error updating Order status: {e}")
@@ -405,7 +702,7 @@ class Manager(BasicUser):
             session.close()
 
     def update_inventory(
-        self, item: Union[Chair, Table], quantity: int, f_type_enum: int, sign: int
+        self, item: Union[Chair, Table], quantity: int, sign: int
     ) -> None:
         """
         Update inventory item quantity.
@@ -426,6 +723,7 @@ class Manager(BasicUser):
                 raise ValueError("Quantity must be non-negative")
             if sign not in [0, 1]:
                 raise ValueError("Sign must be 1 or 0.")
+
         except Exception as e:
             raise Exception(f"Error updating Inventory: {e}")
         inv.update_amount_in_inventory(item, quantity, sign)
@@ -457,6 +755,6 @@ class Manager(BasicUser):
 
         except Exception as e:
             session.rollback()
-            raise Exception(f"Error updating Order status: {e}")
+            raise Exception(f"Error retrieving orders: {e}")
         finally:
             session.close()
