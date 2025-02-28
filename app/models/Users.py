@@ -279,7 +279,6 @@ class Authentication:
             raise TypeError("password must be a string")
         if len(new_password) < 8:
             raise ValueError("new_password lenght not valid")
-        
 
         session = SessionLocal()
         try:
@@ -368,7 +367,7 @@ class BasicUser(ABC):
             raise ValueError("new_password lenght not valid")
         if not isinstance(password, str):
             raise TypeError("Password must be a string")
-        
+
         self.name = name
         self.email = self.__validate_email(email)
         self.__password = password  # Already hashed by Authentication
@@ -448,7 +447,7 @@ class User(BasicUser):
         super().__init__(name, email, password)
         if not isinstance(address, str):
             raise TypeError("Address must be a string")
-        if len(address) > 20 or len (address) < 1: 
+        if len(address) > 20 or len(address) < 1:
             raise ValueError("Address length not valid.")
         self.address = address
         self.__credit = credit
@@ -475,7 +474,7 @@ class User(BasicUser):
         """
         if address is None and name is None:
             return
-        
+
         session = SessionLocal()
         try:
             user_db = session.query(UserDB).filter(UserDB.email == self.email).first()
@@ -517,7 +516,7 @@ class User(BasicUser):
             Exception: If an error occurs during update
         """
 
-        if not isinstance(credit, (int,float)):
+        if not isinstance(credit, (int, float)):
             raise TypeError("credit must be a number")
         try:
             session = SessionLocal()
