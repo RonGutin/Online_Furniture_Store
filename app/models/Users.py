@@ -50,7 +50,7 @@ class Authentication:
 
     def validate_auth(self, password: str, hashed_password: str) -> bool:
         """
-        Validate a password against its hashed version.
+        Validate a password against its hashed version..
 
         Args:
             password (str): The plain text password to check
