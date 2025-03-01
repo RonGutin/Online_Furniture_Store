@@ -1,7 +1,7 @@
 import bcrypt
 import re
 from abc import ABC, abstractmethod
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 from typeguard import typechecked
 
 from app.data.DbConnection import SessionLocal, BasicUserDB, UserDB, ManagerDB, OrdersDB
@@ -447,7 +447,7 @@ class User(BasicUser):
         super().__init__(name, email, password)
         if not isinstance(address, str):
             raise TypeError("Address must be a string")
-        if len(address) > 20 or len(address) < 1:
+        if len(address) > 255 or len(address) < 1:
             raise ValueError("Address length not valid.")
         self.address = address
         self.__credit = credit
@@ -543,7 +543,11 @@ class User(BasicUser):
         Returns:
             str: String representation of the cart
         """
-        return str(self.cart)
+        cart_data = {}
+        if len(self.cart.items) > 0:
+            for item in self.cart:
+                cart_data[item[0].name] = item[1]
+        return cart_data
 
     def get_order_hist(self) -> List[Order]:
         """
@@ -684,6 +688,10 @@ class Manager(BasicUser):
             str: String representation of the manager
         """
         return f"Manager: Name = {self.name}, Email = {self.email}"
+
+    def to_dict_without_password(self) -> Dict:
+        """convert manager to dict"""
+        return {"name": self.name, "email": self.email}
 
     def delete_user(self, email: str) -> None:
         """

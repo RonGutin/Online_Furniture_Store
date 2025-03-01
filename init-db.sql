@@ -4,12 +4,12 @@ use FinalProjectDB;
 CREATE TABLE BasicUser(
 	email varchar(25) primary key,
     Uname varchar(20) not null,
-    Upassword varchar(20) not null
+    Upassword varchar(255) not null
 );
 use FinalProjectDB;
 CREATE TABLE Users(
 	email varchar(25) primary key,
-    address varchar(20) not null,
+    address varchar(255) not null,
     credit int,
     foreign key (email) references BasicUser(email)
 );
@@ -111,11 +111,11 @@ VALUES
 -- insert users in BasicUser
 -------------------------------
 INSERT INTO BasicUser (email, Uname, Upassword) VALUES
-  ('raz@example.com', 'Raz', 'password1'),
-  ('ron@example.com', 'Ron', 'password2'),
-  ('amit@example.com', 'Amit', 'password3'),
-  ('hili@example.com', 'Hili', 'password4'),
-  ('tal@example.com', 'Tal', 'password5');
+  ('raz@example.com', 'Raz', '$2b$12$JTtzJ/7KZjqB86binTbkiOwvvfHz5kbXdYozM/ZYErkZWwfP7de5.'),
+  ('ron@example.com', 'Ron', '$2b$12$a8Z4oBJUWDZ0LMjd2uTcP.qhGS1lyb4QO4NB.7t4egs367gtLeScy'),
+  ('amit@example.com', 'Amit', '$2b$12$Y.U3Br864i2qhCVbshTV/.C46cOq/fLxuVP95vq5AyI02t7bzcbVe'),
+  ('hili@example.com', 'Hili', '$2b$12$qs6KJmhtC22E6SAF/npn2.zCNxhVqs1fHMhTp/z6wTuklNhKyAnju'),
+  ('tal@example.com', 'Tal', '$2b$12$NZOF0/a/XvsLMETfP7qRnOLTI1IZ1Xyxm3oqFekQU/1IXIuVRbPh6');
 
 -------------------------------
 -- Insert records into Users and manager tables
