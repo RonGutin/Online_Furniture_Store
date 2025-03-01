@@ -1,76 +1,72 @@
-from flask import Blueprint, jsonify, request,Flask
+from flask import jsonify, request, Flask
 from app.models.inventory import Inventory
+from app.models.FurnitureFactory import FurnitureFactory
+from app.models.Users import Manager
 
 app = Flask(__name__)
 
-@app.route('/')
+
+@app.route("/")
 def home():
-    return "Hello, World!"
-
-@app.route("/hello", methods=["GET"])
-def hello_world():
-    return jsonify({"message": "Hello, Welcome to our shop!"})
+    return "Hello, Welcome to our shop!"
 
 
-# example - delete this function
-@app.route("/data", methods=["POST"])
-def handle_data():
-    data = request.get_json()
-    return jsonify({"received": data})
+@app.route("/update_inventory", methods=["PUT"])
+def update_inventory_by_manager():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        quantity = data.get("quantity")
+        sign = data.get("sign")
+        object_type = data.get("object_type")
+        item = data.get("item")
+        color = item["color"]
 
+        furniture_factory = FurnitureFactory()
 
-def register_endpoints(app):
-    app.register_blueprint(app, url_prefix="/api")
+        if "table" in item:
+            material = item["table"]["material"]
+            item_object = furniture_factory.create_furniture(
+                furniture_type=object_type, color=color, material=material
+            )
 
+        if "chair" in item:
+            is_adjustable = item["chair"]["is_adjustable"]
+            has_armrest = item["chair"]["has_armrest"]
+            item_object = furniture_factory.create_furniture(
+                furniture_type=object_type,
+                color=color,
+                is_adjustable=is_adjustable,
+                has_armrest=has_armrest,
+            )
 
-@app.route("/update_quantity", methods=["GET"])
-def update_quantity():
-    try:  # get info from url request
-        furniture_type = request.args.get("furniture_type", type=int)
-        color = request.args.get("color", type=str)
-        high = request.args.get("high", type=int)
-        depth = request.args.get("depth", type=int)
-        width = request.args.get("width", type=int)
-        is_adjustable = request.args.get("is_adjustable", type=bool)
-        has_armrest = request.args.get("has_armrest", type=bool)
-        material = request.args.get("material", type=str)
-        action = request.args.get(
-            "action", type=str
-        )  # regular user can send only '1'(buying = remove from inventory) (bool)
-        quntity = request.args.get("quntity", type=str)
-        inventory_object = Inventory()
-        furniture_id = inventory_object.get_indx_furniture_by_values(
-            furniture_type=furniture_type,
-            color=color,
-            high=high,
-            depth=depth,
-            width=width,
-            is_adjustable=is_adjustable,
-            has_armrest=has_armrest,
-            material=material,
-            inventory_object=inventory_object,
-        )
-        if not furniture_id:
-            return jsonify({"error: DB connection failed"}), 500
-        if furniture_id == -1:
+        if not item_object:
             return (
                 jsonify(
                     {
-                        "error: Missing required parameters/there is no furniture with those params"
+                        "message": "There is no object that has the characteristics you specified."
                     }
                 ),
-                400,
+                404,
             )
-        if furniture_id:
-            try:
-                res = inventory_object.update_quntity(
-                    indx=furniture_id, action=action, quntity=quntity
-                )
-                if res:
-                    return jsonify({"updating succsuss"}), 200
-                if not res:
-                    return jsonify({"error: Inventory updating failed"}), 500
-            except Exception as e:
-                return jsonify({"error": f"An error occurred: {e}"}), 500
-    except Exception as e:
-        return jsonify({"error": f"An error occurred: {e}"}), 500
+
+        manager = Manager(email="hili@example.com", name="Hili", password="password4")
+        res = manager.update_inventory(item=item_object, quantity=quantity, sign=sign)
+        return jsonify({"message": "Inventory updated successfully."}), 200
+
+    except Exception as es:
+        return jsonify({"message": f"Error updating Inventory: {es}"}), 500
+
+
+@app.route("/get_furniture_info_by_price_range", methods=["GET"])
+def get_furniture_info_by_price_range():
+    max_price = float(request.args.get("max_price"))
+    min_price = float(request.args.get("min_price"))
+    inv = Inventory()
+    res = inv.get_information_by_price_range(min_price=min_price, max_price=max_price)
+    if res is None:
+        return jsonify({"message": "Error while processing request"}), 500
+    elif len(res) > 0:
+        return res, 200
+    return jsonify({"message": "There are no furnitures in this price range"}), 200

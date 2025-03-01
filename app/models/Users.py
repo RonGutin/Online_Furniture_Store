@@ -364,7 +364,7 @@ class BasicUser(ABC):
         if not password.strip():
             raise ValueError("Password cannot be empty")
         if len(password) < 8:
-            raise ValueError("new_password lenght not valid")
+            raise ValueError("password length not valid")
         if not isinstance(password, str):
             raise TypeError("Password must be a string")
 

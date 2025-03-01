@@ -18,7 +18,7 @@ class FakeDiningTable:
 
 
 @pytest.mark.integration
-@patch("app.utils.transform_pascal_to_snake", return_value=1)
+@patch("app.utils.transform_pascal_to_snake", return_value="DINING_TABLE")
 def test_get_index_furniture_by_values_existing_table(mocked_transform):
     table = FakeDiningTable(color="brown", dimensions=(100, 50, 60), material="wood")
     returned_id = get_index_furniture_by_values(table)
@@ -48,7 +48,7 @@ class FakeGamingChair:
 
 
 @pytest.mark.integration
-@patch("app.utils.transform_pascal_to_snake", return_value=5)
+@patch("app.utils.transform_pascal_to_snake", return_value="GAMING_CHAIR")
 def test_get_index_furniture_by_values_existing_chair(mocked_transform):
 
     chair = FakeGamingChair(

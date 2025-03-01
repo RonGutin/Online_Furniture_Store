@@ -1,5 +1,5 @@
 import pytest
-from flask import Flask, Response
+from flask import Flask
 from unittest.mock import MagicMock
 from app.models.inventory import Inventory
 
@@ -138,15 +138,29 @@ def test_get_information_by_price_range_found(monkeypatch, inv):
     with flask_app.app_context():
         fake_session = MagicMock()
         fake_session.__enter__.return_value = fake_session
-        fake_item1 = DummyInventoryDB(quantity=3, price=75)
-        fake_item2 = DummyInventoryDB(quantity=8, price=85)
+        # Create fake InventoryDB objects that will be converted to dicts
+        fake_item1 = MagicMock()
+        fake_item1.__dict__ = {
+            "quantity": 3,
+            "price": 75,
+            "_sa_instance_state": object(),
+        }
+        fake_item2 = MagicMock()
+        fake_item2.__dict__ = {
+            "quantity": 8,
+            "price": 85,
+            "_sa_instance_state": object(),
+        }
+
         fake_query = MagicMock()
         fake_query.filter.return_value.all.return_value = [fake_item1, fake_item2]
         fake_session.query.return_value = fake_query
         monkeypatch.setattr("app.models.inventory.SessionLocal", lambda: fake_session)
+
         response = inv.get_information_by_price_range(50, 100)
-        assert isinstance(response, Response)
-        assert response.json == [
+        # Test now expects a list directly, not a Response object
+        assert isinstance(response, list)
+        assert response == [
             {"quantity": 3, "price": 75},
             {"quantity": 8, "price": 85},
         ]
@@ -162,6 +176,8 @@ def test_get_information_by_price_range_no_results(monkeypatch, inv):
         fake_query.filter.return_value.all.return_value = []
         fake_session.query.return_value = fake_query
         monkeypatch.setattr("app.models.inventory.SessionLocal", lambda: fake_session)
+
         response = inv.get_information_by_price_range(50, 100)
-        assert response is None
+        # The function now returns an empty list instead of None when no results are found
+        assert response == []
         fake_session.close.assert_called_once()
