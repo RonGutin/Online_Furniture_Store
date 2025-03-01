@@ -1,26 +1,29 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request,Flask
 from app.models.inventory import Inventory
 
-api_blueprint = Blueprint("api", __name__)
+app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return "Hello, World!"
 
-@api_blueprint.route("/hello", methods=["GET"])
+@app.route("/hello", methods=["GET"])
 def hello_world():
     return jsonify({"message": "Hello, Welcome to our shop!"})
 
 
 # example - delete this function
-@api_blueprint.route("/data", methods=["POST"])
+@app.route("/data", methods=["POST"])
 def handle_data():
     data = request.get_json()
     return jsonify({"received": data})
 
 
 def register_endpoints(app):
-    app.register_blueprint(api_blueprint, url_prefix="/api")
+    app.register_blueprint(app, url_prefix="/api")
 
 
-@api_blueprint.route("/update_quantity", methods=["GET"])
+@app.route("/update_quantity", methods=["GET"])
 def update_quantity():
     try:  # get info from url request
         furniture_type = request.args.get("furniture_type", type=int)

@@ -1,6 +1,7 @@
 from app.data.DbConnection import SessionLocal, CouponsCodes
 from app.models.FurnituresClass import DiningTable, GamingChair
 from app.models.ShoppingCart import ShoppingCart
+from app.api.endpoints import app
 
 """
 Important - this file is temporary until we build a real main file
@@ -93,4 +94,5 @@ def main():
         print(e)
 
 
-main()
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5005)
