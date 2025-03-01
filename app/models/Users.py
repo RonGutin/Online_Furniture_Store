@@ -414,6 +414,10 @@ class BasicUser(ABC):
         """
         pass
 
+    def to_dict_without_password(self) -> Dict:
+        """convert manager to dict"""
+        return {"name": self.name, "email": self.email}
+
 
 class User(BasicUser):
     """
@@ -543,11 +547,7 @@ class User(BasicUser):
         Returns:
             str: String representation of the cart
         """
-        cart_data = {}
-        if len(self.cart.items) > 0:
-            for item in self.cart:
-                cart_data[item[0].name] = item[1]
-        return cart_data
+        return str(self.cart)
 
     def get_order_hist(self) -> List[Order]:
         """
@@ -557,6 +557,32 @@ class User(BasicUser):
             List[Order]: List of Order objects associated with the user
         """
         return self._orders
+
+    def get_order_hist_from_db(self) -> Optional[List[Dict[str, str]]]:
+        """
+        Gets all user's orders history from the DB.
+        Returns a list of dictionaries containing order details.
+        If no orders are found, returns None.
+        """
+        session = SessionLocal()  # Assuming SessionLocal is defined elsewhere
+        try:
+            orders_list = []
+            my_orders = OrdersDB.query.filter_by(UserEmail=self.email).all()
+
+            if not my_orders:
+                return None  # Return None if no orders found
+
+            for order in my_orders:
+                orders_list.append(
+                    {"order_id": order.id, "order_status": order.Ostatus}
+                )
+
+            return orders_list  # Return list of orders
+        except Exception as ex:
+            print(f"An unexpected error occurred: {ex}")
+            return None
+        finally:
+            session.close()
 
     def set_password(self, new_password: str) -> None:
         """
@@ -689,10 +715,6 @@ class Manager(BasicUser):
         """
         return f"Manager: Name = {self.name}, Email = {self.email}"
 
-    def to_dict_without_password(self) -> Dict:
-        """convert manager to dict"""
-        return {"name": self.name, "email": self.email}
-
     def delete_user(self, email: str) -> None:
         """
         Delete user from databases.
@@ -813,20 +835,22 @@ class Manager(BasicUser):
         session = SessionLocal()
         try:
             orders = session.query(OrdersDB).all()
+            orders_list = []
 
-            for order in orders:
-                print("=" * 50)
-                print(f"Order ID        : {order.id}")
-                print(f"Status          : {order.Ostatus}")
-                print(f"User Email      : {order.UserEmail}")
-                print(
-                    f"Coupon Code ID  : {order.idCouponsCodes if order.idCouponsCodes else 'None'}"
-                )
-                print("=" * 50)
-                print()
+            if orders:
+                for order in orders:
+                    order_dict = {
+                        "order_id": order.id,
+                        "status": order.Ostatus,
+                        "user_email": order.UserEmail,
+                        "coupon_code_id": (
+                            order.idCouponsCodes if order.idCouponsCodes else None
+                        ),
+                    }
+                    orders_list.append(order_dict)
+            return orders_list
 
         except Exception as e:
-            session.rollback()
             raise Exception(f"Error retrieving orders: {e}")
         finally:
             session.close()

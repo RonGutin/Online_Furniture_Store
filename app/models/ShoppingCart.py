@@ -121,7 +121,7 @@ class ShoppingCart:
             furniture.Print_matching_product_advertisement()
         return ans
 
-    def remove_item(self, furniture: "Furniture") -> None:
+    def remove_item(self, furniture: "Furniture") -> bool:
         """
         Remove a furniture item from the shopping cart.
 
@@ -138,7 +138,7 @@ class ShoppingCart:
 
         # Iterate through the cart items to find the furniture to remove
         for item in self.items:
-            if item[0] == furniture:
+            if item[0].name == furniture.name:
                 self.items.remove(item)
                 is_in_items = True
                 break  # Exit the loop once the item is found and removed
@@ -146,6 +146,8 @@ class ShoppingCart:
         # If the item wasn't found in the cart, raise an exception
         if not is_in_items:
             raise ValueError("Item not in cart - nothing to remove")
+
+        return is_in_items
 
     def __repr__(self) -> str:
         """Return a string representation of the shopping cart."""
@@ -159,3 +161,17 @@ class ShoppingCart:
             lines.append(f"{i}. {repr(furniture)}\n   Quantity: {amount}")
 
         return "\n".join(lines)
+
+    def view_cart(self) -> str:
+        """
+        Get a string representation of the user's shopping cart.
+
+        Returns:
+            str: String representation of the cart
+        """
+        cart_data = {}
+        if len(self.items) > 0:
+            for item in self.items:
+                f_n = (item[0]).name
+                cart_data[f_n] = item[1]
+        return cart_data
