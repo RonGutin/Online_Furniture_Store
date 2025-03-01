@@ -50,7 +50,7 @@ class Authentication:
 
     def validate_auth(self, password: str, hashed_password: str) -> bool:
         """
-        Validate a password against its hashed version.
+        Validate a password against its hashed version..
 
         Args:
             password (str): The plain text password to check
@@ -85,14 +85,24 @@ class Authentication:
         # Custom validation for value constraints
         if not name.strip():
             raise ValueError("Name cannot be empty")
+        if not isinstance(name, str):
+            raise TypeError("Name must be a string")
         if not email.strip():
             raise ValueError("Email cannot be empty")
+        if not isinstance(email, str):
+            raise TypeError("Email must be a string")
+        if len(email) > 25:
+            raise ValueError("Email too long")
         if not password.strip():
             raise ValueError("Password cannot be empty")
         if len(password) < 8:
             raise ValueError("Password must be at least 8 characters long")
+        if not isinstance(password, str):
+            raise TypeError("Password must be a string")
         if not address.strip():
             raise ValueError("Address cannot be empty")
+        if not isinstance(address, str):
+            raise TypeError("Address must be a string")
         if credit < 0:
             raise ValueError("Credit cannot be negative")
 
@@ -148,10 +158,18 @@ class Authentication:
         # Custom validation for value constraints
         if not name.strip():
             raise ValueError("Name cannot be empty")
+        if not isinstance(name, str):
+            raise TypeError("Name must be a string")
         if not email.strip():
             raise ValueError("Email cannot be empty")
+        if not isinstance(email, str):
+            raise TypeError("Email must be a string")
+        if len(email) > 25:
+            raise ValueError("Email too long")
         if not password.strip():
             raise ValueError("Password cannot be empty")
+        if not isinstance(password, str):
+            raise TypeError("Password must be a string")
         if len(password) < 8:
             raise ValueError("Password must be at least 8 characters long")
 
@@ -257,6 +275,11 @@ class Authentication:
             ValueError: If user/manager not found in database
             Exception: If an error occurs during password update
         """
+        if not isinstance(new_password, str):
+            raise TypeError("password must be a string")
+        if len(new_password) < 8:
+            raise ValueError("new_password lenght not valid")
+
         session = SessionLocal()
         try:
             basic_user_db = (
@@ -328,6 +351,23 @@ class BasicUser(ABC):
         Raises:
             ValueError: If the email format is invalid
         """
+        if not name.strip():
+            raise ValueError("Name cannot be empty")
+        if not isinstance(name, str):
+            raise TypeError("Name must be a string")
+        if not email.strip():
+            raise ValueError("Email cannot be empty")
+        if not isinstance(email, str):
+            raise TypeError("Email must be a string")
+        if len(email) > 25:
+            raise ValueError("Email too long")
+        if not password.strip():
+            raise ValueError("Password cannot be empty")
+        if len(password) < 8:
+            raise ValueError("new_password lenght not valid")
+        if not isinstance(password, str):
+            raise TypeError("Password must be a string")
+
         self.name = name
         self.email = self.__validate_email(email)
         self.__password = password  # Already hashed by Authentication
@@ -405,6 +445,10 @@ class User(BasicUser):
             credit (float, optional): User's initial credit. Defaults to 0.
         """
         super().__init__(name, email, password)
+        if not isinstance(address, str):
+            raise TypeError("Address must be a string")
+        if len(address) > 20 or len(address) < 1:
+            raise ValueError("Address length not valid.")
         self.address = address
         self.__credit = credit
         self.cart = ShoppingCart()
@@ -430,6 +474,7 @@ class User(BasicUser):
         """
         if address is None and name is None:
             return
+
         session = SessionLocal()
         try:
             user_db = session.query(UserDB).filter(UserDB.email == self.email).first()
@@ -470,6 +515,9 @@ class User(BasicUser):
             ValueError: If user not found in database
             Exception: If an error occurs during update
         """
+
+        if not isinstance(credit, (int, float)):
+            raise TypeError("credit must be a number")
         try:
             session = SessionLocal()
             user_db = session.query(UserDB).filter(UserDB.email == self.email).first()
@@ -611,6 +659,22 @@ class Manager(BasicUser):
             password (str): Manager's hashed password
         """
         super().__init__(name, email, password)
+        if not name.strip():
+            raise ValueError("Name cannot be empty")
+        if not isinstance(name, str):
+            raise TypeError("Name must be a string")
+        if not email.strip():
+            raise ValueError("Email cannot be empty")
+        if not isinstance(email, str):
+            raise TypeError("Email must be a string")
+        if len(email) > 25:
+            raise ValueError("Email too long")
+        if not password.strip():
+            raise ValueError("Password cannot be empty")
+        if len(password) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not isinstance(password, str):
+            raise TypeError("Password must be a string")
 
     def __repr__(self) -> str:
         """
