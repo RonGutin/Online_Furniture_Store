@@ -17,3 +17,6 @@ bcrypt
 coverage
 
 pymysql
+
+cryptography
+

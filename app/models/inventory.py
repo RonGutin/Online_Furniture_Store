@@ -20,7 +20,7 @@ class Inventory:
         return cls._instance
 
     def update_amount_in_inventory(
-        self, item: object, quantity: int, sign: bool
+        self, item: object, quantity: int, sign: int
     ) -> None:
         """
         Updates the quantity of a furniture item in inventory.
@@ -37,7 +37,7 @@ class Inventory:
             raise TypeError("Error: No item provided.")
         if not isinstance(quantity, int):
             raise TypeError("quantity must be a number.")
-        if not isinstance(sign, bool):
+        if not isinstance(sign, int):
             raise TypeError("sign must be a True/False.")
 
         furniture_type: str = transform_pascal_to_snake(item.__class__.__name__)
@@ -161,17 +161,17 @@ class Inventory:
                     )
                     .all()
                 )
-
+                json_data = []
                 if result:
-                    json_data = []
+
                     for row in result:
                         # Assuming here you want to format the row to JSON
+                        row_dict = row.__dict__
+                        row_dict.pop("_sa_instance_state", None)
                         json_data.append(
-                            row.to_dict()
+                            row_dict
                         )  # Example conversion, adjust according to actual logic
-
-                if len(json_data) > 0:
-                    ans = jsonify(json_data)
+                ans = json_data
 
         except Exception as e:
             print(f"Error fetching data: {e}")

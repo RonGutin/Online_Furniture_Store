@@ -1,26 +1,26 @@
-CREATE DATABASE IF NOT EXISTS FinalProjectDB;
+CREATE DATABASE FinalProjectDB;
 
-USE FinalProjectDB;
-
-CREATE TABLE IF NOT EXISTS BasicUser(
-    email VARCHAR(25) PRIMARY KEY,
-    Uname VARCHAR(20) NOT NULL,
-    Upassword VARCHAR(20) NOT NULL
+use FinalProjectDB;
+CREATE TABLE BasicUser(
+	email varchar(25) primary key,
+    Uname varchar(20) not null,
+    Upassword varchar(255) not null
+);
+use FinalProjectDB;
+CREATE TABLE Users(
+	email varchar(25) primary key,
+    address varchar(255) not null,
+    credit int,
+    foreign key (email) references BasicUser(email)
+);
+use FinalProjectDB;
+CREATE TABLE Managers(
+  email varchar(25) PRIMARY KEY,
+  FOREIGN KEY (email) REFERENCES BasicUser(email)
 );
 
-CREATE TABLE IF NOT EXISTS Users(
-    email VARCHAR(25) PRIMARY KEY,
-    address VARCHAR(20) NOT NULL,
-    credit INT,
-    FOREIGN KEY (email) REFERENCES BasicUser(email)
-);
-
-CREATE TABLE IF NOT EXISTS Managers(
-    email VARCHAR(25) PRIMARY KEY,
-    FOREIGN KEY (email) REFERENCES BasicUser(email)
-);
-
-CREATE TABLE IF NOT EXISTS Inventory (
+use FinalProjectDB;
+CREATE TABLE Inventory (
     id INT AUTO_INCREMENT PRIMARY KEY,
     furniture_type INT NOT NULL,
     color VARCHAR(50) NOT NULL,
@@ -33,26 +33,30 @@ CREATE TABLE IF NOT EXISTS Inventory (
     is_adjustable BOOLEAN DEFAULT FALSE,
     has_armrest BOOLEAN DEFAULT FALSE,
     material VARCHAR(50),
-    quntity INT NOT NULL DEFAULT 0
+    quantity INT NOT NULL DEFAULT 0
 );
-
-CREATE TABLE IF NOT EXISTS CouponsCodes (
+ use FinalProjectDB;
+CREATE TABLE CouponsCodes (
     idCouponsCodes INT PRIMARY KEY,
     CouponValue VARCHAR(48) UNIQUE NOT NULL,
     Discount INT NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS Orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    Ostatus VARCHAR(20) NOT NULL,
-    UserEmail VARCHAR(25) NOT NULL,
+use FinalProjectDB;
+CREATE TABLE Orders (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    Ostatus varchar(20) NOT NULL,
+    UserEmail varchar(25) NOT NULL,
     idCouponsCodes INT,
-    FOREIGN KEY (UserEmail) REFERENCES Users(email),
-    FOREIGN KEY (idCouponsCodes) REFERENCES CouponsCodes(idCouponsCodes)
+    foreign key(UserEmail) references BasicUser(email),
+    foreign key(idCouponsCodes) references CouponsCodes(idCouponsCodes)
 );
 
+
+-------------------------------
+-- insert furniture in inventory
+-------------------------------
 INSERT INTO Inventory 
-  (furniture_type, color, f_name, f_desc, price, high, depth, width, is_adjustable, has_armrest, material, quntity)
+  (furniture_type, color, f_name, f_desc, price, high, depth, width, is_adjustable, has_armrest, material, quantity)
 VALUES
   (1, 'brown', 'brown dining table', 'A high quality dining table in brown.', 120.00, 100, 50, 60, NULL, NULL, 'wood', 0),
   (1, 'brown', 'brown dining table', 'A high quality dining table in brown.', 99.99, 100, 50, 60, NULL, NULL, 'metal', 10),
@@ -60,20 +64,62 @@ VALUES
   (1, 'gray',  'gray dining table',  'A high quality dining table in gray.',  99.99, 100, 50, 60, NULL, NULL, 'metal', 0);
 
 INSERT INTO Inventory 
-  (furniture_type, color, f_name, f_desc, price, high, depth, width, is_adjustable, has_armrest, material, quntity)
+  (furniture_type, color, f_name, f_desc, price, high, depth, width, is_adjustable, has_armrest, material, quantity)
 VALUES
   (2, 'black', 'black work desk', 'A high quality work desk in black.', 149.99, 120, 55, 65, NULL, NULL, 'wood', 1),
   (2, 'black', 'black work desk', 'A high quality work desk in black.', 199.99, 120, 55, 65, NULL, NULL, 'glass', 7),
   (2, 'white', 'white work desk', 'A high quality work desk in white.', 149.99, 120, 55, 65, NULL, NULL, 'wood', 5),
   (2, 'white', 'white work desk', 'A high quality work desk in white.', 199.99, 120, 55, 65, NULL, NULL, 'glass', 10);
 
-INSERT INTO BasicUser (email, Uname, Upassword) VALUES
-  ('raz@example.com', 'Raz', 'pass1'),
-  ('ron@example.com', 'Ron', 'pass2'),
-  ('amit@example.com', 'Amit', 'pass3'),
-  ('hili@example.com', 'Hili', 'pass4'),
-  ('tal@example.com', 'Tal', 'pass5');
+INSERT INTO Inventory 
+  (furniture_type, color, f_name, f_desc, price, high, depth, width, is_adjustable, has_armrest, material, quantity)
+VALUES
+  (3, 'gray', 'gray coffee table', 'A high quality coffee table in gray.', 199.99, 130, 60, 70, NULL, NULL, 'glass', 1),
+  (3, 'gray', 'gray coffee table', 'A high quality coffee table in gray.', 99.99, 130, 60, 70, NULL, NULL, 'plastic', 10),
+  (3, 'red',  'red coffee table',  'A high quality coffee table in red.',  199.99, 130, 60, 70, NULL, NULL, 'glass', 5),
+  (3, 'red',  'red coffee table',  'A high quality coffee table in red.',  99.99, 130, 60, 70, NULL, NULL, 'plastic', 0);
 
+INSERT INTO Inventory 
+  (furniture_type, color, f_name, f_desc, price, high, depth, width, is_adjustable, has_armrest, material, quantity)
+VALUES
+  
+  (4, 'red',   'red work chair',   'A high quality work chair in red.',   279.99, 140, 65, 75, TRUE,  TRUE,  NULL, 5),
+  (4, 'red',   'red work chair',   'A high quality work chair in red.',   249.99, 140, 65, 75, TRUE,  FALSE, NULL, 0),
+  (4, 'red',   'red work chair',   'A high quality work chair in red.',   259.99, 140, 65, 75, FALSE, TRUE,  NULL, 20),
+  (4, 'red',   'red work chair',   'A high quality work chair in red.',   219.99, 140, 65, 75, FALSE, FALSE, NULL, 7),
+  (4, 'white', 'white work chair', 'A high quality work chair in white.', 249.99, 140, 65, 75, TRUE,  TRUE,  NULL, 15),
+  (4, 'white', 'white work chair', 'A high quality work chair in white.', 279.99, 140, 65, 75, TRUE,  FALSE, NULL, 2),
+  (4, 'white', 'white work chair', 'A high quality work chair in white.', 249.99, 140, 65, 75, FALSE, TRUE,  NULL, 10),
+  (4, 'white', 'white work chair', 'A high quality work chair in white.', 219.99, 140, 65, 75, FALSE, FALSE, NULL, 1);
+
+INSERT INTO Inventory 
+  (furniture_type, color, f_name, f_desc, price, high, depth, width, is_adjustable, has_armrest, material, quantity)
+VALUES
+  
+  (5, 'black', 'black gaming chair', 'A high quality gaming chair in black.', 299.99, 150, 70, 80, TRUE,  TRUE,  NULL, 10),
+  (5, 'black', 'black gaming chair', 'A high quality gaming chair in black.', 299.99, 150, 70, 80, TRUE,  FALSE, NULL, 5),
+  (5, 'black', 'black gaming chair', 'A high quality gaming chair in black.', 299.99, 150, 70, 80, FALSE, TRUE,  NULL, 5),
+  (5, 'black', 'black gaming chair', 'A high quality gaming chair in black.', 299.99, 150, 70, 80, FALSE, FALSE, NULL, 10),
+  (5, 'blue', 'blue gaming chair', 'A high quality gaming chair in blue.', 299.99, 150, 70, 80, TRUE,  TRUE,  NULL, 0),
+  (5, 'blue', 'blue gaming chair', 'A high quality gaming chair in blue.', 299.99, 150, 70, 80, TRUE,  FALSE, NULL, 1),
+  (5, 'blue', 'blue gaming chair', 'A high quality gaming chair in blue.', 299.99, 150, 70, 80, FALSE, TRUE,  NULL, 10),
+  (5, 'blue', 'blue gaming chair', 'A high quality gaming chair in blue.', 299.99, 150, 70, 80, FALSE, FALSE, NULL, 7);
+
+
+
+-------------------------------
+-- insert users in BasicUser
+-------------------------------
+INSERT INTO BasicUser (email, Uname, Upassword) VALUES
+  ('raz@example.com', 'Raz', '$2b$12$JTtzJ/7KZjqB86binTbkiOwvvfHz5kbXdYozM/ZYErkZWwfP7de5.'),
+  ('ron@example.com', 'Ron', '$2b$12$a8Z4oBJUWDZ0LMjd2uTcP.qhGS1lyb4QO4NB.7t4egs367gtLeScy'),
+  ('amit@example.com', 'Amit', '$2b$12$Y.U3Br864i2qhCVbshTV/.C46cOq/fLxuVP95vq5AyI02t7bzcbVe'),
+  ('hili@example.com', 'Hili', '$2b$12$qs6KJmhtC22E6SAF/npn2.zCNxhVqs1fHMhTp/z6wTuklNhKyAnju'),
+  ('tal@example.com', 'Tal', '$2b$12$NZOF0/a/XvsLMETfP7qRnOLTI1IZ1Xyxm3oqFekQU/1IXIuVRbPh6');
+
+-------------------------------
+-- Insert records into Users and manager tables
+-------------------------------
 INSERT INTO Users (email, address, credit) VALUES
   ('raz@example.com', 'Address1', 0),
   ('ron@example.com', 'Address2', 50),
@@ -82,10 +128,14 @@ INSERT INTO Users (email, address, credit) VALUES
 INSERT INTO Managers (email) VALUES
   ('hili@example.com'),
   ('tal@example.com');
-
-INSERT INTO CouponsCodes (idCouponsCodes, CouponValue, Discount) VALUES
+  
+  -------------------------------
+-- Insert coupons into CouponsCodes table
+-------------------------------
+  INSERT INTO CouponsCodes (idCouponsCodes, CouponValue, Discount) VALUES
   (1, 'SAVE10', 10),
   (2, 'DISCOUNT20', 20),
   (3, 'PROMO30', 30),
   (4, 'COUPON40', 40),
   (5, 'OFFER50', 50);
+

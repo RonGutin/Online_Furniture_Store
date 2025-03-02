@@ -3,6 +3,7 @@ from typing import Optional
 from sqlalchemy import and_
 
 from app.data.DbConnection import SessionLocal, InventoryDB
+from app.models.EnumsClass import FurnitureType
 
 
 def transform_pascal_to_snake(text: str) -> str:
@@ -37,6 +38,7 @@ def get_index_furniture_by_values(item) -> Optional[int]:
 
     try:
         furniture_type = transform_pascal_to_snake(item.__class__.__name__)
+        furniture_type = FurnitureType[furniture_type].value
 
         with SessionLocal() as session:
             filters = [
