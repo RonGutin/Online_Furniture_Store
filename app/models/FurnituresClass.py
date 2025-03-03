@@ -316,17 +316,17 @@ class Table(Furniture, ABC):
                                 break
             if ans:
                 advertising = (
-                    "*** SPECIAL OFFER !!! ***\n"
-                    "We found a matching chair for your table!\n"
-                    f"Description: {f_desc_match}\n"
-                    f"Adjustable: {'Yes' if is_adjustable_match else 'No'}\n"
-                    f"Has Armrest: {'Yes' if has_armrest_match else 'No'}\n"
+                    "*** SPECIAL OFFER !!! ***    "
+                    "We found a matching chair for your table! "
+                    f"Description: {f_desc_match }"
+                    f"Adjustable: {'Yes' if is_adjustable_match else 'No'} "
+                    f"Has Armrest: {'Yes' if has_armrest_match else 'No'} "
                     "It's the perfect chair for you, and it's in stock!"
                 )
         except Exception as ex:
             print(f"Error connecting to DB or fetching data: {ex}")
-
-        return advertising
+        finally:
+            return advertising
 
     @abstractmethod
     def Print_matching_product_advertisement(self) -> None:
@@ -416,17 +416,17 @@ class Chair(Furniture, ABC):
                                 break
             if ans:
                 advertising = (
-                    "*** SPECIAL OFFER !!! ***\n"
-                    "We found a matching table for your chair!\n"
-                    f"Description: {f_desc_match}\n"
-                    f"Material: {material_match}\n"
+                    "*** SPECIAL OFFER !!! ***    "
+                    "We found a matching table for your chair! "
+                    f"Description: {f_desc_match} "
+                    f"Material: {material_match} "
                     "It's the perfect table for you, and it's in stock!"
                 )
 
         except Exception as ex:
             print(f"Error connecting to DB or fetching data: {ex}")
-
-        return advertising
+        finally:
+            return advertising
 
     @abstractmethod
     def Print_matching_product_advertisement(self) -> None:
@@ -471,7 +471,7 @@ class DiningTable(Table):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class WorkDesk(Table):
@@ -510,7 +510,7 @@ class WorkDesk(Table):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class CoffeeTable(Table):
@@ -549,7 +549,7 @@ class CoffeeTable(Table):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class GamingChair(Chair):
@@ -595,7 +595,7 @@ class GamingChair(Chair):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class WorkChair(Chair):
@@ -638,4 +638,4 @@ class WorkChair(Chair):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans

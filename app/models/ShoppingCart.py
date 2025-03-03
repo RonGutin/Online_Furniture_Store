@@ -95,6 +95,7 @@ class ShoppingCart:
             raise ValueError("Not the right amount")
 
         ans: bool = False
+        adv: str = ""
         try:
             is_in_items: bool = False
             index_item: int = -1
@@ -114,12 +115,12 @@ class ShoppingCart:
                         [furniture, amount]
                     )  # param furniture: An object of type Furniture
                     ans = True
-        except Exception as ex:
-            print(f"Error in adding item to shopping cart. Error: {ex}")
+        except Exception as e:
+            return False, f"Error in checkout process: {e}"
 
         if ans:
-            furniture.Print_matching_product_advertisement()
-        return ans
+            adv = furniture.Print_matching_product_advertisement()
+        return ans, adv
 
     def remove_item(self, furniture: "Furniture") -> bool:
         """

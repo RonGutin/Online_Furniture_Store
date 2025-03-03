@@ -630,88 +630,73 @@ class TestUser:
 
         mock_set_new_password.assert_called_once_with(mock_user, "newpassword123")
 
+
+@pytest.mark.usefixtures("mock_user")
+class TestCheckout:
     @patch("app.models.Users.Authentication.validate_credit_card", return_value=True)
     def test_checkout_success(self, mock_validate_cc, mock_user):
         """Test successful checkout"""
-        # Create a properly configured cart mock
         mock_cart = MagicMock()
         mock_cart.items = [(MagicMock(), 2), (MagicMock(), 1)]
         mock_cart.get_total_price.return_value = 500
 
-        # Setup coupon handling
         mock_cart.get_coupon_discount_and_id.return_value = (10, 123)
         mock_cart.apply_discount.return_value = 450
 
-        # Make sure the items pass availability check
         for item, _ in mock_cart.items:
             item.check_availability.return_value = True
 
-        # Replace user's cart and set up credit
         mock_user.cart = mock_cart
         mock_user._User__credit = 50.0
         mock_user.update_credit = MagicMock()
 
-        # Mock inventory
         mock_inventory = MagicMock()
         with patch("app.models.Users.Inventory", return_value=mock_inventory):
-            # Mock Order creation to return a specific mock we can track
             mock_order = MagicMock()
             with patch("app.models.Users.Order", return_value=mock_order):
-                # Test basic checkout (no coupon)
-                result = mock_user.checkout(1234567890)
-
-                assert result is True
-                # Check if order was added to user's orders
+                success, msg = mock_user.checkout(1234567890)
+                assert success is True, f"Expected True, got {success}. Msg: {msg}"
                 assert mock_order in mock_user._orders
-                # Verify credit was used
                 assert mock_user.update_credit.call_count == 1
                 assert mock_user.update_credit.call_args[0][0] == -50.0
-                # Verify inventory was updated for both items
                 assert mock_inventory.update_amount_in_inventory.call_count == 2
 
-                # Clear state for the next test
                 mock_user._orders = []
                 mock_user.update_credit.reset_mock()
                 mock_inventory.update_amount_in_inventory.reset_mock()
 
-                # Test checkout with coupon
                 mock_order2 = MagicMock()  # Different mock for second order
                 with patch("app.models.Users.Order", return_value=mock_order2):
-                    result = mock_user.checkout(1234567890, "DISCOUNT10")
+                    success, msg = mock_user.checkout(1234567890, "DISCOUNT10")
 
-                    assert result is True
-                    # Check if order was added
+                    assert success is True, f"Expected True, got {success}. Msg: {msg}"
                     assert mock_order2 in mock_user._orders
-                    # Verify coupon was processed
                     assert mock_cart.get_coupon_discount_and_id.call_count == 1
                     assert (
                         mock_cart.get_coupon_discount_and_id.call_args[0][0]
                         == "DISCOUNT10"
                     )
                     assert mock_cart.apply_discount.call_count == 1
-                    # Verify credit was used properly
                     assert mock_user.update_credit.call_count == 1
-                    # Verify inventory was updated for all items
                     assert mock_inventory.update_amount_in_inventory.call_count == 2
 
     def test_checkout_empty_cart(self, mock_user):
         """Test checkout with empty cart"""
         mock_user.cart.items = []
 
-        result = mock_user.checkout(1234567890)
+        success, msg = mock_user.checkout(1234567890)
 
-        assert result is False
+        assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
     def test_checkout_unavailable_item(self, mock_user, mock_shopping_cart):
         """Test checkout with unavailable item"""
         mock_user.cart = mock_shopping_cart
 
-        # One item not available
         mock_user.cart.items[0][0].check_availability.return_value = False
 
-        result = mock_user.checkout(1234567890)
+        success, msg = mock_user.checkout(1234567890)
 
-        assert result is False
+        assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
     @patch("app.models.Users.Authentication.validate_credit_card")
     def test_checkout_invalid_credit_card(
@@ -725,9 +710,9 @@ class TestUser:
         for item, _ in mock_user.cart.items:
             item.check_availability.return_value = True
 
-        result = mock_user.checkout(1234567890)
+        success, msg = mock_user.checkout(1234567890)
 
-        assert result is False
+        assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
     def test_checkout_invalid_quantity(self, mock_user, mock_shopping_cart):
         """Test checkout with invalid item quantity"""
@@ -742,11 +727,10 @@ class TestUser:
 
         with patch(
             "app.models.Users.Authentication.validate_credit_card", return_value=True
-        ):
-            with patch("app.models.Users.Inventory"):
-                result = mock_user.checkout(1234567890)
+        ), patch("app.models.Users.Inventory"):
+            success, msg = mock_user.checkout(1234567890)
 
-                assert result is False
+            assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
     def test_repr(self, mock_user):
         """Test string representation of a User"""

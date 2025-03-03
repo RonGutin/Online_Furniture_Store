@@ -104,11 +104,9 @@ def test_get_match_furniture(mock_session, furniture_objects):
     assert "Great Chair" in advertisement
 
 
-@patch("builtins.print")
 @patch("app.models.FurnituresClass.SessionLocal")
-def test_Print_matching_product_advertisement(
-    mock_session, mock_print, furniture_objects
-):
+def test_Print_matching_product_advertisement(mock_session, furniture_objects):
+    # Modified test: Instead of checking print output, we check the returned advertisement.
     mock_db = MagicMock()
     mock_session.return_value = mock_db
     mock_session.return_value.__enter__.return_value = mock_db
@@ -127,8 +125,10 @@ def test_Print_matching_product_advertisement(
             "It's the perfect chair for you, and it's in stock!"
         ),
     ):
-        furniture_objects["dining_table"].Print_matching_product_advertisement()
-    mock_print.assert_any_call(
+        advertisement = furniture_objects[
+            "dining_table"
+        ].Print_matching_product_advertisement()
+    expected = (
         "*** SPECIAL OFFER !!! ***\n"
         "We found a matching chair for your table!\n"
         "Description: Amazing Chair\n"
@@ -136,6 +136,7 @@ def test_Print_matching_product_advertisement(
         "Has Armrest: Yes\n"
         "It's the perfect chair for you, and it's in stock!"
     )
+    assert advertisement == expected
 
 
 def test_repr_dining_table(furniture_objects):
@@ -372,84 +373,68 @@ def test_calculate_discount_wrong_type(furniture_objects):
         dining_table.calculate_discount("ten")
 
 
-def test_WorkDesk_Print_matching_product_advertisement_success(
-    capfd, furniture_objects
-):
+def test_WorkDesk_Print_matching_product_advertisement_success(furniture_objects):
     work_desk = furniture_objects["work_desk"]
     with patch.object(
         work_desk, "_get_match_furniture", return_value="WORKDESK MATCH FOUND"
     ):
-        work_desk.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "WORKDESK MATCH FOUND" in captured
+        advertisement = work_desk.Print_matching_product_advertisement()
+    assert "WORKDESK MATCH FOUND" in advertisement
 
 
-def test_WorkDesk_Print_matching_product_advertisement_no_match(
-    capfd, furniture_objects
-):
+def test_WorkDesk_Print_matching_product_advertisement_no_match(furniture_objects):
     work_desk = furniture_objects["work_desk"]
     WorkDesk._WorkDesk__optimal_matches = {}
-    work_desk.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "Sorry, we did not find an item" in captured
+    advertisement = work_desk.Print_matching_product_advertisement()
+    assert "Sorry, we did not find an item" in advertisement
 
 
-def test_CoffeeTable_Print_matching_product_advertisement_success(
-    capfd, furniture_objects
-):
+def test_CoffeeTable_Print_matching_product_advertisement_success(furniture_objects):
     coffee_table = furniture_objects["coffee_table"]
     with patch.object(
         coffee_table, "_get_match_furniture", return_value="COFFEETABLE MATCH FOUND"
     ):
-        coffee_table.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "COFFEETABLE MATCH FOUND" in captured
+        advertisement = coffee_table.Print_matching_product_advertisement()
+    assert "COFFEETABLE MATCH FOUND" in advertisement
 
 
-def test_CoffeeTable_Print_matching_product_advertisement_no_match(
-    capfd, furniture_objects
-):
+def test_CoffeeTable_Print_matching_product_advertisement_no_match(furniture_objects):
     coffee_table = furniture_objects["coffee_table"]
     CoffeeTable._CoffeeTable__optimal_matches = {}
-    coffee_table.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "Sorry, we did not find an item" in captured
+    advertisement = coffee_table.Print_matching_product_advertisement()
+    assert "Sorry, we did not find an item" in advertisement
 
 
-def test_GamingChair_Print_matching_product_advertisement_success(capfd):
+def test_GamingChair_Print_matching_product_advertisement_success():
     chair = GamingChair(color="black", is_adjustable=True, has_armrest=True)
     with patch.object(
         chair, "_get_match_furniture", return_value="GAMINGCHAIR MATCH FOUND"
     ):
-        chair.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "GAMINGCHAIR MATCH FOUND" in captured
+        advertisement = chair.Print_matching_product_advertisement()
+    assert "GAMINGCHAIR MATCH FOUND" in advertisement
 
 
-def test_GamingChair_Print_matching_product_advertisement_no_match(capfd):
+def test_GamingChair_Print_matching_product_advertisement_no_match():
     chair = GamingChair(color="black", is_adjustable=True, has_armrest=True)
     GamingChair._GamingChair__optimal_matches = {}
-    chair.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "Sorry, we did not find an item" in captured
+    advertisement = chair.Print_matching_product_advertisement()
+    assert "Sorry, we did not find an item" in advertisement
 
 
-def test_WorkChair_Print_matching_product_advertisement_success(capfd):
+def test_WorkChair_Print_matching_product_advertisement_success():
     chair = WorkChair(color="red", is_adjustable=True, has_armrest=False)
     with patch.object(
         chair, "_get_match_furniture", return_value="WORKCHAIR MATCH FOUND"
     ):
-        chair.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "WORKCHAIR MATCH FOUND" in captured
+        advertisement = chair.Print_matching_product_advertisement()
+    assert "WORKCHAIR MATCH FOUND" in advertisement
 
 
-def test_WorkChair_Print_matching_product_advertisement_no_match(capfd):
+def test_WorkChair_Print_matching_product_advertisement_no_match():
     chair = WorkChair(color="red", is_adjustable=True, has_armrest=False)
     WorkChair._WorkChair__optimal_matches = {}
-    chair.Print_matching_product_advertisement()
-    captured = capfd.readouterr().out
-    assert "Sorry, we did not find an item" in captured
+    advertisement = chair.Print_matching_product_advertisement()
+    assert "Sorry, we did not find an item" in advertisement
 
 
 def test_repr_GamingChair():

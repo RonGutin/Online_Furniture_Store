@@ -7,6 +7,19 @@ from cachetools import TTLCache
 app = Flask(__name__)
 
 
+# raz - start
+@app.after_request
+def add_cache_headers(response):
+    if request.method == "GET":
+        response.headers["Cache-Control"] = "public, max-age=3600"
+    else:
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+# end - raz
+
+
 @app.route("/")
 def home():
     return "Hello, Welcome to our shop!"
@@ -15,7 +28,7 @@ def home():
 MAIN_MANAGER = Manager(
     email="hili@example.com", name="Hili", password="password4"
 )  # DO NOT DELETE OR CHANGE THIS VARIABLE!!!!
-cache_store = TTLCache(maxsize=100, ttl=2200)
+cache_store = TTLCache(maxsize=100, ttl=3600)
 
 
 @app.route("/update_inventory", methods=["PUT"])
@@ -437,7 +450,9 @@ def add_item_to_cart():
                     ),
                     404,
                 )
-            res = user_inst.cart.add_item(furniture=item_object, amount=amount)
+            res, advertisement = user_inst.cart.add_item(
+                furniture=item_object, amount=amount
+            )
             if not res:
                 return (
                     jsonify(
@@ -453,7 +468,8 @@ def add_item_to_cart():
                 jsonify(
                     {
                         "message": "The addition to the shopping cart "
-                        "was completed successfully!"
+                        "was completed successfully!",
+                        "advertisement": advertisement,
                     }
                 ),
                 200,
@@ -559,3 +575,72 @@ def remove_item_from_cart():
             return jsonify({"message": f"Error removing item from cart: {es}"}), 500
     except Exception as es:
         return jsonify({"message": f"Connection error: {es}"}), 500
+
+
+# raz
+@app.route("/checkout", methods=["POST"])
+def checkout_endpoint():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "No data provided"}), 400
+
+        email = data.get("email")
+        if email not in cache_store:
+            return (
+                jsonify({"message": "User must be logged in to perform checkout."}),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not user_inst or not isinstance(user_inst, User):
+            return jsonify({"message": "Invalid user."}), 400
+
+        credit_card_num = data.get("credit_card_num")
+        coupon_code = data.get("coupon_code", None)
+
+        success, msg = user_inst.checkout(credit_card_num, coupon_code)
+        if success:
+            return jsonify({"message": msg}), 200
+        else:
+            return jsonify({"message": msg}), 400
+
+    except Exception as e:
+        return jsonify({"message": f"Error in checkout process: {e}"}), 500
+
+
+@app.route("/get_total_price", methods=["GET"])
+def get_total_price_of_cart():
+    try:
+        email = request.args.get("email")
+        coupon_code = request.args.get("coupon_code", None)
+        if not email or email not in cache_store:
+            return jsonify({"message": "User must be logged in."}), 400
+
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return jsonify({"message": "User not found."}), 400
+
+        if not isinstance(user_inst, User):
+            return (
+                jsonify({"message": "Only a user can view the shopping cart."}),
+                400,
+            )
+        if (coupon_code is None) or (not coupon_code):
+            total_price = user_inst.cart.get_total_price()
+            return jsonify({"total_price": total_price}), 200
+
+        if not isinstance(coupon_code, str):
+            return (
+                jsonify({"message": "coupon code must be str."}),
+                400,
+            )
+        else:
+            discount_percent, coupon_id = user_inst.cart.get_coupon_discount_and_id(
+                coupon_code
+            )
+            total_price = user_inst.cart.apply_discount(discount_percent)
+            return jsonify({"total_price": total_price}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"Error retrieving total price: {e}"}), 500

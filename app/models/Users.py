@@ -1,7 +1,8 @@
 import bcrypt
 import re
 from abc import ABC, abstractmethod
-from typing import Union, Optional, List, Dict
+from typing import Union, Optional, List, Dict, Tuple
+
 from typeguard import typechecked
 
 from app.data.DbConnection import SessionLocal, BasicUserDB, UserDB, ManagerDB, OrdersDB
@@ -594,7 +595,9 @@ class User(BasicUser):
         Authentication().set_new_password(self, new_password)
         return
 
-    def checkout(self, credit_card_num: int, coupon_code: Optional[str] = None) -> bool:
+    def checkout(
+        self, credit_card_num: int, coupon_code: Optional[str] = None
+    ) -> Tuple[bool, str]:
         """
         Process checkout of items in the shopping cart.
 
@@ -645,12 +648,9 @@ class User(BasicUser):
 
             new_order = Order(self.email, self.cart, coupon_id)
             self._orders.append(new_order)
-            ans = True
-
+            return True, "Checkout successful!"
         except Exception as e:
-            print(f"Error in checkout Proc: {e}")
-        finally:
-            return ans
+            return False, f"Error in checkout process: {e}"
 
     def __repr__(self) -> str:
         """

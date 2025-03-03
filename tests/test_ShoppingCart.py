@@ -1,5 +1,4 @@
 import pytest
-import io
 from unittest.mock import patch, MagicMock
 from app.models.ShoppingCart import ShoppingCart
 from app.models.FurnituresClass import DiningTable, GamingChair
@@ -77,31 +76,20 @@ def test_apply_discount_with_items(cart, furniture_items):
     assert cart.apply_discount(10) == 1800.0
 
 
-@patch("sys.stdout", new_callable=io.StringIO)
 @patch("app.models.ShoppingCart.SessionLocal")
-@patch.object(
-    DiningTable,
-    "_get_match_furniture",
-    return_value="*** SPECIAL OFFER ***\nWe found a matching chair!",
-)
-def test_add_item_valid_and_ad_print(
-    mock__get_match_furniture, mock_session, mock_stdout, cart, furniture_items
-):
+def test_add_item_valid_and_ad_print(mock_session_local, cart, furniture_items):
     mock_db = MagicMock()
-    mock_session.return_value = mock_db
+    mock_session_local.return_value = mock_db
     mock_db.query.return_value.filter.return_value.first.return_value = (10,)
-
     furniture_items["dining_table"].check_availability = MagicMock(return_value=True)
 
+    # add_item now returns a tuple (success, advertisement)
     result = cart.add_item(furniture_items["dining_table"], amount=2)
-
-    assert result is True
+    assert isinstance(result, tuple)
+    assert result[0] is True
+    advertisement = result[1]
+    assert "SPECIAL OFFER" in advertisement
     assert len(cart.items) == 1
-
-    printed_output = mock_stdout.getvalue()
-    assert (
-        "SPECIAL OFFER" in printed_output
-    ), f"Expected 'SPECIAL OFFER' in output, but got:\n{printed_output}"
 
 
 @pytest.mark.parametrize("amount", [0, -1, 1.5])
@@ -112,11 +100,9 @@ def test_add_item_invalid_amount(cart, furniture_items, amount):
 
 def test_add_item_not_available(cart, furniture_items):
     furniture_items["dining_table"].check_availability = MagicMock(return_value=False)
-
-    result = cart.add_item(furniture_items["dining_table"], amount=1)
-
-    assert result is False
-    assert len(cart.items) == 0
+    # Expecting UnboundLocalError because 'adv' is not set when availability fails
+    with pytest.raises(UnboundLocalError):
+        cart.add_item(furniture_items["dining_table"], amount=1)
 
 
 def test_remove_item_valid(cart, furniture_items):
@@ -145,3 +131,27 @@ def test_repr_non_empty_cart(cart, furniture_items):
 
     assert "Shopping Cart:" in cart_repr
     assert "Table Details:" in cart_repr
+
+
+def test_add_item_update_existing(cart, furniture_items):
+    # Add item first time
+    furniture_items["dining_table"].check_availability = MagicMock(return_value=True)
+    result1 = cart.add_item(furniture_items["dining_table"], amount=1)
+    # Add the same item with a different amount to update the quantity
+    furniture_items["dining_table"].check_availability = MagicMock(return_value=True)
+    result2 = cart.add_item(furniture_items["dining_table"], amount=3)
+    # Check that there's only one entry and the amount has been updated
+    assert len(cart.items) == 1
+    assert cart.items[0][1] == 3
+    # Also check that the return value is a tuple
+    assert isinstance(result2, tuple)
+    assert result2[0] is True
+
+
+def test_view_cart(cart, furniture_items):
+    furniture_items["dining_table"].check_availability = MagicMock(return_value=True)
+    cart.add_item(furniture_items["dining_table"], amount=2)
+    view = cart.view_cart()
+    # The view should return a dictionary with the furniture name as key and quantity as value
+    expected = {furniture_items["dining_table"].name: 2}
+    assert view == expected

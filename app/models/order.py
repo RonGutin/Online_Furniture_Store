@@ -92,7 +92,7 @@ class Order:
             session.refresh(order_db)
             self._id = order_db.id
 
-            for item, amount in self._items.items():
+            for item, amount in self._items:
                 order_item_db = OrderContainsItemDB(
                     OrderID=self._id,
                     ItemID=get_index_furniture_by_values(item),
