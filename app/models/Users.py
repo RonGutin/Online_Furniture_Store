@@ -612,7 +612,6 @@ class User(BasicUser):
             ValueError: If cart is empty, item quantity is invalid, or credit card is invalid
         """
         try:
-            ans = False
             if self.cart.items:
                 for item, quantity in self.cart.items:
                     if not item.check_availability(quantity):

@@ -925,45 +925,190 @@ class TestManager:
             ):
                 mock_manager.update_inventory(mock_chair, 5, 2)
 
-    # @patch("app.models.Users.SessionLocal")
-    # def test_get_all_orders(self, mock_session_local, mock_session, mock_manager):
-    #     """Test getting all orders"""
-    #     mock_session_local.return_value = mock_session
+    @patch("app.models.Users.SessionLocal")
+    def test_get_all_orders(self, mock_session_local, mock_session, mock_manager):
+        mock_session_local.return_value = mock_session
+        mock_order1 = MagicMock()
+        mock_order1.id = 1
+        mock_order1.Ostatus = OrderStatus.PENDING
+        mock_order1.UserEmail = "user1@example.com"
+        mock_order1.idCouponsCodes = None
+        mock_order2 = MagicMock()
+        mock_order2.id = 2
+        mock_order2.Ostatus = OrderStatus.SHIPPED
+        mock_order2.UserEmail = "user2@example.com"
+        mock_order2.idCouponsCodes = "COUPON123"
+        mock_session.query.return_value.all.return_value = [mock_order1, mock_order2]
+        orders_list = mock_manager.get_all_orders()
+        assert isinstance(orders_list, list)
+        assert len(orders_list) == 2
+        assert orders_list[0]["order_id"] == 1
+        assert orders_list[1]["order_id"] == 2
 
-    #     # Set up mock for orders
-    #     mock_order1 = MagicMock()
-    #     mock_order1.id = 1
-    #     mock_order1.Ostatus = OrderStatus.PENDING
-    #     mock_order1.UserEmail = "user1@example.com"
-    #     mock_order1.idCouponsCodes = None
+    @patch("app.models.Users.SessionLocal")
+    def test_get_all_orders_exception(
+        self, mock_session_local, mock_session, mock_manager
+    ):
+        mock_session_local.return_value = mock_session
+        mock_session.query.return_value.all.side_effect = Exception("Database error")
+        with pytest.raises(Exception, match="Error retrieving orders: Database error"):
+            mock_manager.get_all_orders()
+        assert mock_session.close.call_count == 1
 
-    #     mock_order2 = MagicMock()
-    #     mock_order2.id = 2
-    #     mock_order2.Ostatus = OrderStatus.SHIPPED
-    #     mock_order2.UserEmail = "user2@example.com"
-    #     mock_order2.idCouponsCodes = "COUPON123"
 
-    #     mock_session.query.return_value.all.return_value = [mock_order1, mock_order2]
+class DummyBasicUser(BasicUser):
+    def set_password(self, new_password: str) -> None:
+        pass
 
-    #     # Capture print output
-    #     with patch("builtins.print") as mock_print:
-    #         mock_manager.get_all_orders()
+    def __repr__(self) -> str:
+        return f"DummyBasicUser: {self.name}, {self.email}"
 
-    #         # Check print was called multiple times for each order
-    #         assert mock_print.call_count >= 10
 
-    # @patch("app.models.Users.SessionLocal")
-    # def test_get_all_orders_exception(
-    #     self, mock_session_local, mock_session, mock_manager
-    # ):
-    #     """Test handling exceptions when getting all orders"""
-    #     mock_session_local.return_value = mock_session
+def dummy_session_user_not_found():
+    class DummySession:
+        def query(self, model):
+            class DummyQuery:
+                def filter(self, condition):
+                    return self
 
-    #     # Simulate exception during query
-    #     mock_session.query.return_value.all.side_effect = Exception("Database error")
+                def first(self):
+                    return None
 
-    #     with pytest.raises(Exception, match="Error retrieving orders"):
-    #         mock_manager.get_all_orders()
+            return DummyQuery()
 
-    #     assert mock_session.rollback.call_count == 1
-    #     assert mock_session.close.call_count == 1
+        def commit(self):
+            pass
+
+        def rollback(self):
+            pass
+
+        def close(self):
+            pass
+
+    return DummySession()
+
+
+def dummy_session_orders_empty():
+    class DummySession:
+        def query(self, model):
+            return MagicMock(all=lambda: [])
+
+        def close(self):
+            pass
+
+    return DummySession()
+
+
+def dummy_session_update_exception():
+    class DummySession:
+        def query(self, model):
+            class DummyQuery:
+                def filter(self, condition):
+                    return self
+
+                def first(self):
+                    return MagicMock()
+
+            return DummyQuery()
+
+        def commit(self):
+            raise Exception("DB update error")
+
+        def rollback(self):
+            pass
+
+        def close(self):
+            pass
+
+    return DummySession()
+
+
+def test_basic_user_email_too_long():
+    with pytest.raises(ValueError, match="Email too long"):
+        DummyBasicUser("Test", "a" * 26 + "@ex.com", "hashedpassword")
+
+
+def test_basic_user_invalid_password_length():
+    with pytest.raises(ValueError, match="password length not valid"):
+        DummyBasicUser("Test", "test@example.com", "short")
+
+
+def test_user_invalid_address_type():
+    with pytest.raises(TypeError, match="Address must be a string"):
+        User("John Doe", "john@example.com", "hashedpass123", 12345, 100.0)
+
+
+def test_user_invalid_address_length():
+    with pytest.raises(ValueError, match="Address length not valid."):
+        User("John Doe", "john@example.com", "hashedpass123", "", 100.0)
+
+
+@patch("app.models.Users.SessionLocal", side_effect=dummy_session_user_not_found)
+def test_update_user_details_not_found(mock_session):
+    user = User("John Doe", "john@example.com", "hashedpass123", "123 Main St", 100.0)
+    with pytest.raises(ValueError, match="User not found in database"):
+        user.update_user_details(address="456 New St")
+
+
+def test_update_credit_invalid_type():
+    user = User("John Doe", "john@example.com", "hashedpass123", "123 Main St", 100.0)
+    with pytest.raises(TypeError, match="credit must be a number"):
+        user.update_credit("fifty")
+
+
+@patch("app.models.Users.SessionLocal", side_effect=dummy_session_update_exception)
+def test_update_credit_exception(mock_session):
+    user = User("John Doe", "john@example.com", "hashedpass123", "123 Main St", 100.0)
+    with pytest.raises(Exception, match="Error updating credit: DB update error"):
+        user.update_credit(50.0)
+
+
+@patch("app.models.Users.SessionLocal", side_effect=dummy_session_orders_empty)
+def test_get_order_hist_from_db_empty(mock_session):
+    user = User("John Doe", "john@example.com", "hashedpass123", "123 Main St", 100.0)
+    orders = user.get_order_hist_from_db()
+    assert orders is None
+
+
+def test_user_view_cart_returns_string():
+    user = User("John Doe", "john@example.com", "hashedpass123", "123 Main St", 100.0)
+    user.cart = ShoppingCart()
+    user.cart.items = []
+    result = user.view_cart()
+    assert isinstance(result, str)
+
+
+def test_user_repr():
+    user = User("John Doe", "john@example.com", "hashedpass123", "123 Main St", 100.0)
+    rep = repr(user)
+    assert "User: Name =" in rep
+    assert "Email=" in rep
+
+
+def test_manager_invalid_init():
+    with pytest.raises(ValueError, match="Name cannot be empty"):
+        Manager("", "manager@example.com", "hashedpass123")
+    with pytest.raises(ValueError, match="Email cannot be empty"):
+        Manager("Admin", "", "hashedpass123")
+    with pytest.raises(ValueError, match="Password cannot be empty"):
+        Manager("Admin", "manager@example.com", "")
+
+
+@patch("app.models.Users.SessionLocal", side_effect=dummy_session_update_exception)
+def test_manager_update_order_status_exception(mock_session):
+    manager = Manager("Admin", "manager@example.com", "hashedpass123")
+    with pytest.raises(Exception, match="Error updating Order status: DB update error"):
+        manager.update_order_status(1)
+
+
+def test_manager_repr():
+    manager = Manager("Admin", "manager@example.com", "hashedpass123")
+    rep = repr(manager)
+    assert "Manager: Name =" in rep
+    assert "Email =" in rep
+
+
+def test_authentication_validate_credit_card():
+    assert Authentication.validate_credit_card(0, 1234567890) is True
+    assert Authentication.validate_credit_card(100, 1234567890) is True
+    assert Authentication.validate_credit_card(100, "invalid") is False

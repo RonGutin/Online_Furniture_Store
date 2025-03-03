@@ -482,11 +482,11 @@ def test_table_get_match_furniture_success(monkeypatch):
     dt = DiningTable(color="brown", material="wood")
     result = dt._get_match_furniture([14])
     expected = (
-        "*** SPECIAL OFFER !!! ***\n"
-        "We found a matching chair for your table!\n"
-        "Description: Valid Chair\n"
-        "Adjustable: Yes\n"
-        "Has Armrest: No\n"
+        "*** SPECIAL OFFER !!! ***    "
+        "We found a matching chair for your table! "
+        "Description: Valid Chair "
+        "Adjustable: Yes "
+        "Has Armrest: No "
         "It's the perfect chair for you, and it's in stock!"
     )
     assert result == expected
@@ -570,10 +570,10 @@ def test_chair_get_match_furniture_success(monkeypatch):
     wc = WorkChair(color="red", is_adjustable=True, has_armrest=False)
     result = wc._get_match_furniture([5])
     expected = (
-        "*** SPECIAL OFFER !!! ***\n"
-        "We found a matching table for your chair!\n"
-        "Description: Valid Table\n"
-        "Material: Wood\n"
+        "*** SPECIAL OFFER !!! ***    "
+        "We found a matching table for your chair! "
+        "Description: Valid Table "
+        "Material: Wood "
         "It's the perfect table for you, and it's in stock!"
     )
     assert result == expected
