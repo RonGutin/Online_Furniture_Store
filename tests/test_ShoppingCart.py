@@ -84,7 +84,12 @@ def test_add_item_valid_and_ad_print(mock_session_local, cart, furniture_items):
     mock_session_local.return_value = mock_db
     mock_db.query.return_value.filter.return_value.first.return_value = (10,)
     furniture_items["dining_table"].check_availability = MagicMock(return_value=True)
-    result = cart.add_item(furniture_items["dining_table"], amount=2)
+    with patch.object(
+        furniture_items["dining_table"],
+        "Print_matching_product_advertisement",
+        return_value="*** SPECIAL OFFER ***",
+    ):
+        result = cart.add_item(furniture_items["dining_table"], amount=2)
     assert isinstance(result, tuple)
     assert result[0] is True
     advertisement = result[1]

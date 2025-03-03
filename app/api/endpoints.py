@@ -7,7 +7,6 @@ from cachetools import TTLCache
 app = Flask(__name__)
 
 
-# raz - start
 @app.after_request
 def add_cache_headers(response):
     if request.method == "GET":
@@ -15,9 +14,6 @@ def add_cache_headers(response):
     else:
         response.headers["Cache-Control"] = "no-store"
     return response
-
-
-# end - raz
 
 
 @app.route("/")
@@ -577,7 +573,6 @@ def remove_item_from_cart():
         return jsonify({"message": f"Connection error: {es}"}), 500
 
 
-# raz
 @app.route("/checkout", methods=["POST"])
 def checkout_endpoint():
     try:
