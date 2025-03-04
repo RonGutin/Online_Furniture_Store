@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
-
-from app.data.DbConnection import SessionLocal, InventoryDB
 from app.utils import get_index_furniture_by_values
+from app.data.DbConnection import SessionLocal, InventoryDB
 
 
 class Furniture(ABC):

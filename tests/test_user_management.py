@@ -7,8 +7,8 @@ from app.models.EnumsClass import OrderStatus
 from app.models.order import Order
 from app.models.inventory import Inventory
 from app.models.FurnituresClass import Chair, Table
-from typing import Union
 import typeguard
+from typing import Union
 
 
 def fixed_validate_credit_card(

@@ -2,7 +2,6 @@ import bcrypt
 import re
 from abc import ABC, abstractmethod
 from typing import Union, Optional, List, Dict, Tuple
-
 from typeguard import typechecked
 
 from app.data.DbConnection import SessionLocal, BasicUserDB, UserDB, ManagerDB, OrdersDB

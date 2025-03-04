@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from app.models.FurnituresClass import DiningTable, GamingChair
 from app.models.ShoppingCart import ShoppingCart
+from app.models.FurnituresClass import DiningTable, GamingChair
 
 
 @pytest.fixture
