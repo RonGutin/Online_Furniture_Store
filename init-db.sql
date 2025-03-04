@@ -44,7 +44,7 @@ CREATE TABLE CouponsCodes (
 use FinalProjectDB;
 CREATE TABLE Orders (
 	id INT AUTO_INCREMENT PRIMARY KEY,
-    Ostatus varchar(20) NOT NULL,
+    Ostatus INT NOT NULL,
     UserEmail varchar(25) NOT NULL,
     idCouponsCodes INT,
     foreign key(UserEmail) references BasicUser(email),

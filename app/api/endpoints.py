@@ -38,6 +38,27 @@ def update_inventory_by_manager():
         object_type = data.get("object_type")
         item = data.get("item")
         color = item["color"]
+        existing_admin_email = data["existing_admin_email"]
+        if existing_admin_email not in cache_store:
+            return (
+                jsonify(
+                    {
+                        "message": (
+                            "Only a logged-in administrator can update inventory,"
+                            "Please log in."
+                        )
+                    }
+                ),
+                400,
+            )
+        user_inst = cache_store.get(existing_admin_email)
+        if not isinstance(user_inst, Manager):
+            return (
+                jsonify(
+                    {"message": "Only a logged-in administrator can update inventory."}
+                ),
+                400,
+            )
 
         furniture_factory = FurnitureFactory()
 
@@ -138,9 +159,35 @@ def user_register():
 def manager_register():
     try:
         data = request.get_json()
+        existing_admin_email = data["existing_admin_email"]
         name = data["name"]
         email = data["email"]
         password = data["password"]
+        if existing_admin_email not in cache_store:
+            return (
+                jsonify(
+                    {
+                        "message": (
+                            "Only a logged-in administrator can create"
+                            "a new administrator account."
+                        )
+                    }
+                ),
+                400,
+            )
+        user_inst = cache_store.get(existing_admin_email)
+        if not isinstance(user_inst, Manager):
+            return (
+                jsonify(
+                    {
+                        "message": (
+                            "Only a logged-in administrator can create"
+                            "a new administrator account."
+                        )
+                    }
+                ),
+                400,
+            )
 
         res = MAIN_MANAGER.add_manager(name=name, email=email, password=password)
         cache_store[email] = res
@@ -639,3 +686,139 @@ def get_total_price_of_cart():
 
     except Exception as e:
         return jsonify({"message": f"Error retrieving total price: {e}"}), 500
+
+
+@app.route("/get_user_info", methods=["GET"])
+def get_user_info():
+    try:
+        email = request.args.get("email")
+        if not email or email not in cache_store:
+            return jsonify({"message": "User or Manager must be logged in."}), 400
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return jsonify({"message": "User not found."}), 400
+        ans = user_inst.__repr__()
+        return jsonify({"user_info": ans}), 200
+    except Exception as e:
+        return (
+            jsonify({"message": f"EError while retrieving user information: {e}"}),
+            500,
+        )
+
+
+@app.route("/delete_user", methods=["DELETE"])
+def delete_user():
+    try:
+        data = request.get_json()
+        if not data or "email" not in data:
+            return jsonify({"error": "No email provided"}), 400
+
+        email = data["email"]
+        email_to_delete = data["email_to_delete"]
+
+        if email not in cache_store:
+            return (
+                jsonify({"message": "Only a logged-in manager can delete users."}),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not isinstance(user_inst, Manager):
+            return jsonify({"message": "Only a manager can delete users."}), 400
+
+        MAIN_MANAGER.delete_user(email_to_delete)
+        return (
+            jsonify(
+                {"message": f"User with email {email_to_delete} deleted successfully."}
+            ),
+            200,
+        )
+
+    except ValueError:
+        return jsonify({"message": "Error deleting user: user not found"}), 400
+    except Exception as e:
+        return jsonify({"message": f"Error in delete user: {e}"}), 500
+
+
+@app.route("/update_password", methods=["PUT"])
+def update_password():
+    try:
+        data = request.get_json()
+        if not data or "email" not in data or "new_password" not in data:
+            return jsonify({"error": "Email and new password are required"}), 400
+
+        email = data["email"]
+        new_password = data["new_password"]
+
+        if email not in cache_store:
+            return (
+                jsonify({"message": "You must be logged in to change your password."}),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return (
+                jsonify(
+                    {"message": "You have been disconnected. Please log in again."}
+                ),
+                400,
+            )
+
+        try:
+            user_inst.set_password(new_password)
+            return jsonify({"message": "Password updated successfully"}), 200
+        except TypeError as e:
+            return jsonify({"error": str(e)}), 400
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
+        except Exception as e:
+            return jsonify({"error": f"Error updating password: {e}"}), 500
+
+    except Exception as e:
+        return jsonify({"message": f"Connection error: {e}"}), 500
+
+
+@app.route("/update_order_status", methods=["PUT"])
+def update_order_status():
+    try:
+        data = request.get_json()
+        if not data or "email" not in data or "order_id" not in data:
+            return jsonify({"error": "Email and order ID are required"}), 400
+
+        email = data["email"]
+        order_id = data["order_id"]
+
+        if email not in cache_store:
+            return (
+                jsonify(
+                    {"message": "Only a logged-in manager can update order status."}
+                ),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return (
+                jsonify(
+                    {"message": "You have been disconnected. Please log in again."}
+                ),
+                400,
+            )
+
+        if not isinstance(user_inst, Manager):
+            return jsonify({"message": "Only a manager can update order status."}), 403
+
+        try:
+            user_inst.update_order_status(order_id)
+            return (
+                jsonify({"message": f"Order {order_id} status updated successfully"}),
+                200,
+            )
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except Exception as e:
+            return jsonify({"error": f"Error updating order status: {e}"}), 500
+
+    except Exception as e:
+        return jsonify({"message": f"Connection error: {e}"}), 500

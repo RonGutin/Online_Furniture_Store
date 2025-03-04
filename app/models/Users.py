@@ -323,6 +323,8 @@ class Authentication:
             return True
         if isinstance(credit_card_num, int):
             return True
+        if credit_card_num > 9999999:
+            return True
         return False
 
 
@@ -395,7 +397,6 @@ class BasicUser(ABC):
             raise ValueError("Invalid email format")
         return email.lower()
 
-    @abstractmethod
     def set_password(self, new_password: str) -> None:
         """
         Set a new password for the user.
@@ -403,7 +404,8 @@ class BasicUser(ABC):
         Args:
             new_password (str): The new plain text password
         """
-        pass
+        Authentication().set_new_password(self, new_password)
+        return
 
     @abstractmethod
     def __repr__(self) -> str:
@@ -550,15 +552,6 @@ class User(BasicUser):
         """
         return str(self.cart)
 
-    def get_order_hist(self) -> List[Order]:
-        """
-        Retrieve user's order history.
-
-        Returns:
-            List[Order]: List of Order objects associated with the user
-        """
-        return self._orders
-
     def get_order_hist_from_db(self) -> Optional[List[Dict[str, str]]]:
         """
         Gets all user's orders history from the DB.
@@ -584,16 +577,6 @@ class User(BasicUser):
             return None
         finally:
             session.close()
-
-    def set_password(self, new_password: str) -> None:
-        """
-        Set a new password for the user.
-
-        Args:
-            new_password (str): The new plain text password
-        """
-        Authentication().set_new_password(self, new_password)
-        return
 
     def checkout(
         self, credit_card_num: int, coupon_code: Optional[str] = None
@@ -647,6 +630,7 @@ class User(BasicUser):
 
             new_order = Order(self.email, self.cart, coupon_id)
             self._orders.append(new_order)
+            self.cart = ShoppingCart()
             return True, "Checkout successful!"
         except Exception as e:
             return False, f"Error in checkout process: {e}"
@@ -726,31 +710,27 @@ class Manager(BasicUser):
         """
         session = SessionLocal()
         try:
-            user_db = session.query(UserDB).filter(UserDB.email == email).first()
             basic_user_db = (
                 session.query(BasicUserDB).filter(BasicUserDB.email == email).first()
             )
+            user_db = session.query(UserDB).filter(UserDB.email == email).first()
+            if not user_db:
+                raise ValueError
             if user_db:
                 session.delete(user_db)
+                session.commit()
+
             if basic_user_db:
                 session.delete(basic_user_db)
+                session.commit()
 
-            session.commit()
+        except ValueError:
+            raise ValueError("Not found")
         except Exception as e:
             session.rollback()
             raise Exception(f"Error deleting user: {e}")
         finally:
             session.close()
-
-    def set_password(self, new_password: str) -> None:
-        """
-        Set a new password for the manager.
-
-        Args:
-            new_password (str): The new plain text password
-        """
-        Authentication().set_new_password(self, new_password)
-        return
 
     def add_manager(self, name: str, email: str, password: str) -> Optional["Manager"]:
         """
@@ -780,7 +760,7 @@ class Manager(BasicUser):
         session = SessionLocal()
         try:
             order_db = session.query(OrdersDB).filter(OrdersDB.id == order_id).first()
-            if order_db.id == OrderStatus.DELIVERED:
+            if order_db.Ostatus == OrderStatus.DELIVERED:
                 raise ValueError
             else:
                 order_db.Ostatus += 1
