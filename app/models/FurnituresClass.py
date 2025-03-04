@@ -8,7 +8,7 @@ from app.utils import get_index_furniture_by_values
 class Furniture(ABC):
     """
     A base class for furniture, providing common
-    attributes and methods for different types of furniture.
+    attributes and methods, for different types of furniture.
 
     Attributes:
         color (str): The color of the furniture item.

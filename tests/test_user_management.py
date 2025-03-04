@@ -515,7 +515,7 @@ class TestCheckout:
         ) as FakeOrder:
             fake_inventory = FakeInventory.return_value
             fake_order = FakeOrder.return_value
-            success, msg = mock_user.checkout(1234567890,0)
+            success, msg = mock_user.checkout(1234567890, 0)
             assert success is True, f"Expected True, got {success}. Msg: {msg}"
             assert fake_order in mock_user._orders
             # With credit 50 subtracted from total 500, credit becomes 0.
@@ -525,7 +525,7 @@ class TestCheckout:
             mock_user.cart = fake_cart
             mock_user._orders = []
             fake_order2 = FakeOrder.return_value
-            success, msg = mock_user.checkout(1234567890,0, "DISCOUNT10")
+            success, msg = mock_user.checkout(1234567890, 0, "DISCOUNT10")
             assert success is True, f"Expected True, got {success}. Msg: {msg}"
             assert fake_order2 in mock_user._orders
             assert fake_cart.get_coupon_discount_and_id.call_count == 1
@@ -536,13 +536,13 @@ class TestCheckout:
 
     def test_checkout_empty_cart(self, mock_user):
         mock_user.cart.items = []
-        success, msg = mock_user.checkout(1234567890,0)
+        success, msg = mock_user.checkout(1234567890, 0)
         assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
     def test_checkout_unavailable_item(self, mock_user, mock_shopping_cart):
         mock_user.cart = mock_shopping_cart
         mock_user.cart.items[0][0].check_availability.return_value = False
-        success, msg = mock_user.checkout(1234567890,0)
+        success, msg = mock_user.checkout(1234567890, 0)
         assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
     @patch("app.models.Users.Authentication.validate_credit_card")
@@ -553,7 +553,7 @@ class TestCheckout:
         mock_validate_cc.return_value = False
         for item, _ in mock_user.cart.items:
             item.check_availability.return_value = True
-        success, msg = mock_user.checkout(1234567890,0)
+        success, msg = mock_user.checkout(1234567890, 0)
         assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
     def test_checkout_invalid_quantity(self, mock_user, mock_shopping_cart):
@@ -564,7 +564,7 @@ class TestCheckout:
         with patch(
             "app.models.Users.Authentication.validate_credit_card", return_value=True
         ), patch("app.models.Users.Inventory"):
-            success, msg = mock_user.checkout(1234567890,0)
+            success, msg = mock_user.checkout(1234567890, 0)
             assert success is False, f"Expected False, got {success}. Msg: {msg}"
 
 
@@ -916,7 +916,7 @@ def test_checkout_partial_credit(monkeypatch):
     ) as FakeOrder:
         fake_inventory = FakeInventory.return_value
         fake_order = FakeOrder.return_value
-        success, msg = user.checkout(1234567890,0)
+        success, msg = user.checkout(1234567890, 0)
         assert success is True, f"Expected True, got {success}. Msg: {msg}"
         assert fake_order in user._orders
         # When credit (30) is less than total (100), entire credit is subtracted, leaving 0.

@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch, MagicMock
 from app.models.FurnituresClass import (
     DiningTable,
     WorkDesk,
@@ -7,6 +6,7 @@ from app.models.FurnituresClass import (
     GamingChair,
     WorkChair,
 )
+from unittest.mock import patch, MagicMock
 
 
 @pytest.fixture(autouse=True)

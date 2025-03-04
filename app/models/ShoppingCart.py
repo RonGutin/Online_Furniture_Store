@@ -8,7 +8,7 @@ class ShoppingCart:
     Represents a shopping cart for a user.
 
     Attributes:
-        items (list): List of items in the cart. Each item is represented as a
+        items (list): List of items in the cart. Each item is represented as a - 
         list: [furniture object, amount].
     """
 
