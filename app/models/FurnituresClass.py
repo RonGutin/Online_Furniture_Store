@@ -90,7 +90,7 @@ class Furniture(ABC):
 
         return self._price * (1 - 0.01 * discount_percentage)
 
-    def apply_tax(self, tax_rate: float) -> float:
+    def apply_tax(self, tax_rate: float) -> None:
         """
         Calculates the price including the given tax rate.
 
@@ -104,9 +104,9 @@ class Furniture(ABC):
             ValueError: If the tax rate is negative.
         """
         if tax_rate < 0:
-            raise ValueError("Tax rate cannot be negative.")
+            raise ValueError()
 
-        return self._price * (1 + 0.01 * tax_rate)
+        self._price = self._price * (1 + 0.01 * tax_rate)
 
     def check_availability(self, amount=1) -> bool:
         """Check if the furniture is available in stock."""

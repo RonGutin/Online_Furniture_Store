@@ -627,6 +627,7 @@ def checkout_endpoint():
         if not data:
             return jsonify({"message": "No data provided"}), 400
 
+        tax = data.get("tax_rate")
         email = data.get("email")
         if email not in cache_store:
             return (
@@ -641,7 +642,7 @@ def checkout_endpoint():
         credit_card_num = data.get("credit_card_num")
         coupon_code = data.get("coupon_code", None)
 
-        success, msg = user_inst.checkout(credit_card_num, coupon_code)
+        success, msg = user_inst.checkout(credit_card_num, tax, coupon_code)
         if success:
             return jsonify({"message": msg}), 200
         else:

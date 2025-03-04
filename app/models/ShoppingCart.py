@@ -71,6 +71,20 @@ class ShoppingCart:
             for item in self.items
         )
 
+    def apply_tax_on_cart(self, tax_rate: int) -> bool:
+        """Apply tax on the shopping cart for all items."""
+        try:
+            if not isinstance(tax_rate, int):
+                raise TypeError("Tax rate must be an integer")
+            for item in self.items:
+                ans = item[0].apply_tax(tax_rate)
+            ans = True
+        except Exception:
+            ans = False
+            raise Exception("Tax rate apply failed.")
+        finally:
+            return ans
+
     def add_item(self, furniture: "Furniture", amount: int = 1) -> bool:
         """
         Add a furniture item to the shopping cart.

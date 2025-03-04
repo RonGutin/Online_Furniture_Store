@@ -72,7 +72,8 @@ def test_calculate_discount(furniture_objects):
 
 def test_apply_tax(furniture_objects):
     dining_table = furniture_objects["dining_table"]
-    assert dining_table.apply_tax(10) == 1100.0
+    dining_table.apply_tax(18)
+    assert dining_table._price == 1180.0
     with pytest.raises(ValueError):
         dining_table.apply_tax(-8)
 
@@ -160,7 +161,8 @@ def test_invalid_material_type():
 def test_apply_tax_zero(furniture_objects):
     dining_table = furniture_objects["dining_table"]
     original_price = dining_table.get_price()
-    assert dining_table.apply_tax(0) == original_price
+    dining_table.apply_tax(0)
+    assert dining_table._price == original_price
 
 
 def test_calculate_discount_zero(furniture_objects):

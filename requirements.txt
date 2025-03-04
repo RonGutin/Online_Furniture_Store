@@ -20,3 +20,4 @@ pymysql
 
 cryptography
 
+cachetools == 5.5.2
