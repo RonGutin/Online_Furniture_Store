@@ -35,7 +35,7 @@ CREATE TABLE Inventory (
     material VARCHAR(50),
     quantity INT NOT NULL DEFAULT 0
 );
- use FinalProjectDB;
+use FinalProjectDB;
 CREATE TABLE CouponsCodes (
     idCouponsCodes INT PRIMARY KEY,
     CouponValue VARCHAR(48) UNIQUE NOT NULL,
@@ -44,14 +44,22 @@ CREATE TABLE CouponsCodes (
 use FinalProjectDB;
 CREATE TABLE Orders (
 	id INT AUTO_INCREMENT PRIMARY KEY,
-    Ostatus varchar(20) NOT NULL,
+    Ostatus INT NOT NULL,
     UserEmail varchar(25) NOT NULL,
     idCouponsCodes INT,
     foreign key(UserEmail) references BasicUser(email),
     foreign key(idCouponsCodes) references CouponsCodes(idCouponsCodes)
 );
 
-
+use FinalProjectDB;
+CREATE TABLE OrderContainsItem (
+	OrderID INT,
+    ItemID INT,
+    Amount INT NOT NULL,
+    primary key(OrderID,ItemID),
+    foreign key(OrderID) references Orders (id),
+    foreign key(ItemID) references Inventory (id)    
+);
 -------------------------------
 -- insert furniture in inventory
 -------------------------------
@@ -123,7 +131,7 @@ INSERT INTO BasicUser (email, Uname, Upassword) VALUES
 INSERT INTO Users (email, address, credit) VALUES
   ('raz@example.com', 'Address1', 0),
   ('ron@example.com', 'Address2', 50),
-  ('amit@example.com', 'Address3', 100);
+  ('amit@example.com', '4', 100);
 
 INSERT INTO Managers (email) VALUES
   ('hili@example.com'),

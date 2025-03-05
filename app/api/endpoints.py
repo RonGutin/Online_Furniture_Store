@@ -7,6 +7,15 @@ from cachetools import TTLCache
 app = Flask(__name__)
 
 
+@app.after_request
+def add_cache_headers(response):
+    if request.method == "GET":
+        response.headers["Cache-Control"] = "public, max-age=3600"
+    else:
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @app.route("/")
 def home():
     return "Hello, Welcome to our shop!"
@@ -15,7 +24,7 @@ def home():
 MAIN_MANAGER = Manager(
     email="hili@example.com", name="Hili", password="password4"
 )  # DO NOT DELETE OR CHANGE THIS VARIABLE!!!!
-cache_store = TTLCache(maxsize=100, ttl=2200)
+cache_store = TTLCache(maxsize=100, ttl=3600)
 
 
 @app.route("/update_inventory", methods=["PUT"])
@@ -29,6 +38,27 @@ def update_inventory_by_manager():
         object_type = data.get("object_type")
         item = data.get("item")
         color = item["color"]
+        existing_admin_email = data["existing_admin_email"]
+        if existing_admin_email not in cache_store:
+            return (
+                jsonify(
+                    {
+                        "message": (
+                            "Only a logged-in administrator can update inventory,"
+                            "Please log in."
+                        )
+                    }
+                ),
+                400,
+            )
+        user_inst = cache_store.get(existing_admin_email)
+        if not isinstance(user_inst, Manager):
+            return (
+                jsonify(
+                    {"message": "Only a logged-in administrator can update inventory."}
+                ),
+                400,
+            )
 
         furniture_factory = FurnitureFactory()
 
@@ -129,9 +159,35 @@ def user_register():
 def manager_register():
     try:
         data = request.get_json()
+        existing_admin_email = data["existing_admin_email"]
         name = data["name"]
         email = data["email"]
         password = data["password"]
+        if existing_admin_email not in cache_store:
+            return (
+                jsonify(
+                    {
+                        "message": (
+                            "Only a logged-in administrator can create"
+                            "a new administrator account."
+                        )
+                    }
+                ),
+                400,
+            )
+        user_inst = cache_store.get(existing_admin_email)
+        if not isinstance(user_inst, Manager):
+            return (
+                jsonify(
+                    {
+                        "message": (
+                            "Only a logged-in administrator can create"
+                            "a new administrator account."
+                        )
+                    }
+                ),
+                400,
+            )
 
         res = MAIN_MANAGER.add_manager(name=name, email=email, password=password)
         cache_store[email] = res
@@ -437,7 +493,9 @@ def add_item_to_cart():
                     ),
                     404,
                 )
-            res = user_inst.cart.add_item(furniture=item_object, amount=amount)
+            res, advertisement = user_inst.cart.add_item(
+                furniture=item_object, amount=amount
+            )
             if not res:
                 return (
                     jsonify(
@@ -453,7 +511,8 @@ def add_item_to_cart():
                 jsonify(
                     {
                         "message": "The addition to the shopping cart "
-                        "was completed successfully!"
+                        "was completed successfully!",
+                        "advertisement": advertisement,
                     }
                 ),
                 200,
@@ -559,3 +618,208 @@ def remove_item_from_cart():
             return jsonify({"message": f"Error removing item from cart: {es}"}), 500
     except Exception as es:
         return jsonify({"message": f"Connection error: {es}"}), 500
+
+
+@app.route("/checkout", methods=["POST"])
+def checkout_endpoint():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "No data provided"}), 400
+
+        tax = data.get("tax_rate", None)
+        email = data.get("email")
+        if email not in cache_store:
+            return (
+                jsonify({"message": "User must be logged in to perform checkout."}),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not user_inst or not isinstance(user_inst, User):
+            return jsonify({"message": "Invalid user."}), 400
+
+        credit_card_num = data.get("credit_card_num")
+        coupon_code = data.get("coupon_code", None)
+
+        success, msg = user_inst.checkout(credit_card_num, tax, coupon_code)
+        if success:
+            return jsonify({"message": msg}), 200
+        else:
+            return jsonify({"message": msg}), 400
+
+    except Exception as e:
+        return jsonify({"message": f"Error in checkout process: {e}"}), 500
+
+
+@app.route("/get_total_price", methods=["GET"])
+def get_total_price_of_cart():
+    try:
+        email = request.args.get("email")
+        coupon_code = request.args.get("coupon_code", None)
+        if not email or email not in cache_store:
+            return jsonify({"message": "User must be logged in."}), 400
+
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return jsonify({"message": "User not found."}), 400
+
+        if not isinstance(user_inst, User):
+            return (
+                jsonify({"message": "Only a user can view the shopping cart."}),
+                400,
+            )
+        if (coupon_code is None) or (not coupon_code):
+            total_price = user_inst.cart.get_total_price()
+            return jsonify({"total_price": total_price}), 200
+
+        if not isinstance(coupon_code, str):
+            return (
+                jsonify({"message": "coupon code must be str."}),
+                400,
+            )
+        else:
+            discount_percent, coupon_id = user_inst.cart.get_coupon_discount_and_id(
+                coupon_code
+            )
+            total_price = user_inst.cart.apply_discount(discount_percent)
+            return jsonify({"total_price": total_price}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"Error retrieving total price: {e}"}), 500
+
+
+@app.route("/get_user_info", methods=["GET"])
+def get_user_info():
+    try:
+        email = request.args.get("email")
+        if not email or email not in cache_store:
+            return jsonify({"message": "User or Manager must be logged in."}), 400
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return jsonify({"message": "User not found."}), 400
+        ans = user_inst.__repr__()
+        return jsonify({"user_info": ans}), 200
+    except Exception as e:
+        return (
+            jsonify({"message": f"EError while retrieving user information: {e}"}),
+            500,
+        )
+
+
+@app.route("/delete_user", methods=["DELETE"])
+def delete_user():
+    try:
+        data = request.get_json()
+        if not data or "email" not in data:
+            return jsonify({"error": "No email provided"}), 400
+
+        email = data["email"]
+        email_to_delete = data["email_to_delete"]
+
+        if email not in cache_store:
+            return (
+                jsonify({"message": "Only a logged-in manager can delete users."}),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not isinstance(user_inst, Manager):
+            return jsonify({"message": "Only a manager can delete users."}), 400
+
+        MAIN_MANAGER.delete_user(email_to_delete)
+        return (
+            jsonify(
+                {"message": f"User with email {email_to_delete} deleted successfully."}
+            ),
+            200,
+        )
+
+    except ValueError:
+        return jsonify({"message": "Error deleting user: user not found"}), 400
+    except Exception as e:
+        return jsonify({"message": f"Error in delete user: {e}"}), 500
+
+
+@app.route("/update_password", methods=["PUT"])
+def update_password():
+    try:
+        data = request.get_json()
+        if not data or "email" not in data or "new_password" not in data:
+            return jsonify({"error": "Email and new password are required"}), 400
+
+        email = data["email"]
+        new_password = data["new_password"]
+
+        if email not in cache_store:
+            return (
+                jsonify({"message": "You must be logged in to change your password."}),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return (
+                jsonify(
+                    {"message": "You have been disconnected. Please log in again."}
+                ),
+                400,
+            )
+
+        try:
+            user_inst.set_password(new_password)
+            return jsonify({"message": "Password updated successfully"}), 200
+        except TypeError as e:
+            return jsonify({"error": str(e)}), 400
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
+        except Exception as e:
+            return jsonify({"error": f"Error updating password: {e}"}), 500
+
+    except Exception as e:
+        return jsonify({"message": f"Connection error: {e}"}), 500
+
+
+@app.route("/update_order_status", methods=["PUT"])
+def update_order_status():
+    try:
+        data = request.get_json()
+        if not data or "email" not in data or "order_id" not in data:
+            return jsonify({"error": "Email and order ID are required"}), 400
+
+        email = data["email"]
+        order_id = data["order_id"]
+
+        if email not in cache_store:
+            return (
+                jsonify(
+                    {"message": "Only a logged-in manager can update order status."}
+                ),
+                400,
+            )
+
+        user_inst = cache_store.get(email)
+        if not user_inst:
+            return (
+                jsonify(
+                    {"message": "You have been disconnected. Please log in again."}
+                ),
+                400,
+            )
+
+        if not isinstance(user_inst, Manager):
+            return jsonify({"message": "Only a manager can update order status."}), 403
+
+        try:
+            user_inst.update_order_status(order_id)
+            return (
+                jsonify({"message": f"Order {order_id} status updated successfully"}),
+                200,
+            )
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except Exception as e:
+            return jsonify({"error": f"Error updating order status: {e}"}), 500
+
+    except Exception as e:
+        return jsonify({"message": f"Connection error: {e}"}), 500

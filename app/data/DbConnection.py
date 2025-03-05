@@ -12,7 +12,7 @@ from sqlalchemy.sql import text
 
 
 DATABASE_USERNAME = "root"
-DATABASE_PASSWORD = "HaHa12345!"  # "RAZRAZ123"
+DATABASE_PASSWORD = "RAZRAZ123"  # "HaHa12345!"
 DATABASE_HOST = "localhost"
 DATABASE_PORT = "3306"
 DATABASE_NAME = "FinalProjectDB"

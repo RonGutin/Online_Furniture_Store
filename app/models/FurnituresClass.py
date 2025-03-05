@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
-
-from app.data.DbConnection import SessionLocal, InventoryDB
 from app.utils import get_index_furniture_by_values
+from app.data.DbConnection import SessionLocal, InventoryDB
 
 
 class Furniture(ABC):
     """
     A base class for furniture, providing common
-    attributes and methods for different types of furniture.
+    attributes and methods, for different types of furniture.
 
     Attributes:
         color (str): The color of the furniture item.
@@ -90,7 +89,7 @@ class Furniture(ABC):
 
         return self._price * (1 - 0.01 * discount_percentage)
 
-    def apply_tax(self, tax_rate: float) -> float:
+    def apply_tax(self, tax_rate: float) -> None:
         """
         Calculates the price including the given tax rate.
 
@@ -104,9 +103,9 @@ class Furniture(ABC):
             ValueError: If the tax rate is negative.
         """
         if tax_rate < 0:
-            raise ValueError("Tax rate cannot be negative.")
+            raise ValueError()
 
-        return self._price * (1 + 0.01 * tax_rate)
+        self._price = self._price * (1 + 0.01 * tax_rate)
 
     def check_availability(self, amount=1) -> bool:
         """Check if the furniture is available in stock."""
@@ -316,17 +315,17 @@ class Table(Furniture, ABC):
                                 break
             if ans:
                 advertising = (
-                    "*** SPECIAL OFFER !!! ***\n"
-                    "We found a matching chair for your table!\n"
-                    f"Description: {f_desc_match}\n"
-                    f"Adjustable: {'Yes' if is_adjustable_match else 'No'}\n"
-                    f"Has Armrest: {'Yes' if has_armrest_match else 'No'}\n"
+                    "*** SPECIAL OFFER !!! ***    "
+                    "We found a matching chair for your table! "
+                    f"Description: {f_desc_match } "
+                    f"Adjustable: {'Yes' if is_adjustable_match else 'No'} "
+                    f"Has Armrest: {'Yes' if has_armrest_match else 'No'} "
                     "It's the perfect chair for you, and it's in stock!"
                 )
         except Exception as ex:
             print(f"Error connecting to DB or fetching data: {ex}")
-
-        return advertising
+        finally:
+            return advertising
 
     @abstractmethod
     def Print_matching_product_advertisement(self) -> None:
@@ -416,17 +415,17 @@ class Chair(Furniture, ABC):
                                 break
             if ans:
                 advertising = (
-                    "*** SPECIAL OFFER !!! ***\n"
-                    "We found a matching table for your chair!\n"
-                    f"Description: {f_desc_match}\n"
-                    f"Material: {material_match}\n"
+                    "*** SPECIAL OFFER !!! ***    "
+                    "We found a matching table for your chair! "
+                    f"Description: {f_desc_match} "
+                    f"Material: {material_match} "
                     "It's the perfect table for you, and it's in stock!"
                 )
 
         except Exception as ex:
             print(f"Error connecting to DB or fetching data: {ex}")
-
-        return advertising
+        finally:
+            return advertising
 
     @abstractmethod
     def Print_matching_product_advertisement(self) -> None:
@@ -471,7 +470,7 @@ class DiningTable(Table):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class WorkDesk(Table):
@@ -510,7 +509,7 @@ class WorkDesk(Table):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class CoffeeTable(Table):
@@ -549,7 +548,7 @@ class CoffeeTable(Table):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class GamingChair(Chair):
@@ -595,7 +594,7 @@ class GamingChair(Chair):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans
 
 
 class WorkChair(Chair):
@@ -638,4 +637,4 @@ class WorkChair(Chair):
         else:
             ans = self._get_match_furniture(matches)
 
-        print(ans)
+        return ans

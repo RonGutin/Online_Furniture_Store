@@ -43,11 +43,6 @@ class DummySession:
 
 @pytest.fixture(autouse=True)
 def patch_session_local(monkeypatch):
-    """
-    מחליף את SessionLocal כך שיחזיר DummySession
-    במקום אובייקט Session אמיתי.
-    """
-
     def _dummy_session_local():
         return DummySession()
 
@@ -56,7 +51,6 @@ def patch_session_local(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def patch_inventory(monkeypatch):
-    # Patch לפונקציה get_index_furniture_by_values מהמודול utils
     monkeypatch.setattr(utils, "get_index_furniture_by_values", lambda item: 10)
 
 
@@ -86,10 +80,8 @@ class DummyFurniture:
 def dummy_cart():
     cart = ShoppingCart()
     dummy_furniture = DummyFurniture(1000)
-    cart.items = {dummy_furniture: 2}
-    cart.get_total_price = lambda: sum(
-        f.get_price() * amt for f, amt in cart.items.items()
-    )
+    cart.items = [(dummy_furniture, 2)]
+    cart.get_total_price = lambda: sum(f.get_price() * amt for f, amt in cart.items)
     return cart
 
 
@@ -100,22 +92,17 @@ def test_order_creation(dummy_cart):
     assert order.get_coupon_id() == 42
     assert order.get_status() == OrderStatus.PENDING.name
     assert order.get_id() == 1
-    assert isinstance(order.get_items(), dict)
-    # שימוש ב-.items() לקריאת זוגות מפתח-ערך
-    for item, amount in order.get_items().items():
+    assert isinstance(order.get_items(), list)
+    for item, amount in order.get_items():
         assert amount == 2
 
 
 def test_update_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
-    initial_status = order.get_status()  # מחזיר את שם הסטטוס
+    initial_status = order.get_status()
     order.update_status()
-    expected_status = (
-        OrderStatus[initial_status].value + 1
-    )  # המרת שם הסטטוס לערך מספרי +1
-    assert (
-        order.get_status() == OrderStatus(expected_status).name
-    )  # בדיקה מול שם הסטטוס החדש
+    expected_status = OrderStatus[initial_status].value + 1
+    assert order.get_status() == OrderStatus(expected_status).name
 
 
 def test_update_status_already_delivered(dummy_cart):
@@ -128,7 +115,7 @@ def test_update_status_already_delivered(dummy_cart):
 
 def test_get_status(dummy_cart):
     order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
-    expected_status_name = OrderStatus(order._status).name  # המרה מ-value ל-name
+    expected_status_name = OrderStatus(order._status).name
     assert order.get_status() == expected_status_name
 
 
@@ -139,3 +126,60 @@ def test_order_repr(dummy_cart):
     assert "User email = test@example.com" in rep
     assert "Total price = 2000.00$" in rep
     assert f"Status = {OrderStatus(order._status).name}" in rep
+
+
+def test_invalid_user_mail_type(dummy_cart):
+    with pytest.raises(TypeError, match="user_mail must be a string."):
+        Order(user_mail=123, cart=dummy_cart, coupon_id=42)
+
+
+def test_invalid_cart_type():
+    with pytest.raises(TypeError, match="cart must be an instance of ShoppingCart."):
+        Order(user_mail="test@example.com", cart="not a cart", coupon_id=42)
+
+
+def test_invalid_coupon_type(dummy_cart):
+    with pytest.raises(TypeError, match="coupon_id must be an integer or None."):
+        Order(user_mail="test@example.com", cart=dummy_cart, coupon_id="invalid")
+
+
+def test_set_user_mail_invalid(dummy_cart):
+    order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
+    with pytest.raises(TypeError, match="user_mail must be a string."):
+        order.set_user_mail(123)
+
+
+def test_set_total_price_invalid(dummy_cart):
+    order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
+    with pytest.raises(TypeError, match="total_price must be a number."):
+        order.set_total_price("not a number")
+
+
+def test_set_status_invalid_type(dummy_cart):
+    order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
+    with pytest.raises(TypeError, match="status must be a int."):
+        order.set_status("invalid")
+
+
+def test_set_status_invalid_value(dummy_cart):
+    order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
+    with pytest.raises(ValueError, match="Invalid status value."):
+        order.set_status(999)
+
+
+def test_set_items_invalid(dummy_cart):
+    order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
+    with pytest.raises(TypeError, match="items must be a list."):
+        order.set_items("not a list")
+
+
+def test_set_coupon_id_invalid(dummy_cart):
+    order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
+    with pytest.raises(TypeError, match="coupon_id must be an integer or None."):
+        order.set_coupon_id("invalid")
+
+
+def test_set_id_invalid(dummy_cart):
+    order = Order(user_mail="test@example.com", cart=dummy_cart, coupon_id=42)
+    with pytest.raises(TypeError, match="order_id must be an integer or None."):
+        order.set_id("not an int")
