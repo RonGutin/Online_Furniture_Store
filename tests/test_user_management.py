@@ -519,19 +519,19 @@ class TestCheckout:
             assert success is True, f"Expected True, got {success}. Msg: {msg}"
             assert fake_order in mock_user._orders
             # With credit 50 subtracted from total 500, credit becomes 0.
-            assert mock_user._User__credit == 0
+            assert mock_user._User__credit == 45
             fake_inventory.update_amount_in_inventory.assert_called()
             # Second checkout with coupon
             mock_user.cart = fake_cart
             mock_user._orders = []
             fake_order2 = FakeOrder.return_value
-            success, msg = mock_user.checkout(1234567890, 0, "DISCOUNT10")
+            success, msg = mock_user.checkout(1234567890, "DISCOUNT10")
             assert success is True, f"Expected True, got {success}. Msg: {msg}"
             assert fake_order2 in mock_user._orders
             assert fake_cart.get_coupon_discount_and_id.call_count == 1
             assert fake_cart.get_coupon_discount_and_id.call_args[0][0] == "DISCOUNT10"
             assert fake_cart.apply_discount.call_count >= 1
-            assert mock_user._User__credit == 0
+            assert mock_user._User__credit == 40
             assert fake_inventory.update_amount_in_inventory.call_count >= 2
 
     def test_checkout_empty_cart(self, mock_user):
@@ -920,7 +920,7 @@ def test_checkout_partial_credit(monkeypatch):
         assert success is True, f"Expected True, got {success}. Msg: {msg}"
         assert fake_order in user._orders
         # When credit (30) is less than total (100), entire credit is subtracted, leaving 0.
-        assert user._User__credit == 0
+        assert user._User__credit == 7
         fake_inventory.update_amount_in_inventory.assert_called()
 
 

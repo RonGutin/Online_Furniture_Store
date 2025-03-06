@@ -578,7 +578,7 @@ class User(BasicUser):
             session.close()
 
     def checkout(
-        self, credit_card_num: int, tax: int, coupon_code: Optional[str] = None
+        self, credit_card_num: int, coupon_code: Optional[str] = None
     ) -> Tuple[bool, str]:
         """
         Process checkout of items in the shopping cart.
@@ -600,9 +600,6 @@ class User(BasicUser):
                         raise ValueError(f"There is not enough:{item} in the inventory")
             else:
                 raise ValueError("There are no items in the cart")
-            if (tax is None) or (tax == "None") or (not tax):
-                tax = 0
-            self.cart.apply_tax_on_cart(tax_rate=tax)
 
             if coupon_code:
                 discount_percent, coupon_id = self.cart.get_coupon_discount_and_id(
@@ -633,6 +630,7 @@ class User(BasicUser):
             new_order = Order(self.email, self.cart, coupon_id)
             self._orders.append(new_order)
             self.cart = ShoppingCart()
+            self.update_credit(total_price // 10)
             return True, "Checkout successful!"
         except Exception as e:
             return False, f"Error in checkout process: {e}"
