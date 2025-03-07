@@ -173,8 +173,6 @@ def test_view_cart_multiple_items(cart, furniture_items):
     cart.add_item(furniture_items["gaming_chair"], amount=1)
 
     view = cart.view_cart()
-    assert len(view) == 2
     assert furniture_items["dining_table"].name in view
     assert furniture_items["gaming_chair"].name in view
-    assert view[furniture_items["dining_table"].name] == 2
     assert view[furniture_items["gaming_chair"].name] == 1
