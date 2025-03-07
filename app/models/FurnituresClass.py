@@ -317,7 +317,7 @@ class Table(Furniture, ABC):
                 advertising = (
                     "*** SPECIAL OFFER !!! ***    "
                     "We found a matching chair for your table! "
-                    f"Description: {f_desc_match } "
+                    f"Description: {f_desc_match} "
                     f"Adjustable: {'Yes' if is_adjustable_match else 'No'} "
                     f"Has Armrest: {'Yes' if has_armrest_match else 'No'} "
                     "It's the perfect chair for you, and it's in stock!"

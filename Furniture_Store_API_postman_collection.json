@@ -1,0 +1,660 @@
+{
+	"info": {
+		"_postman_id": "16fecfac-0eae-4235-94c5-ae7cd6e0b840",
+		"name": "raz_api_pro",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42758249",
+		"_collection_link": "https://team14-9661.postman.co/workspace/d448ada6-4a82-42bc-82c8-331bcbf2c619/collection/42758249-16fecfac-0eae-4235-94c5-ae7cd6e0b840?action=share&source=collection_link&creator=42758249"
+	},
+	"item": [
+		{
+			"name": "get_all_orders_by_manager",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"amit@example.com\",\n    \"password\":\"password3\",\n    \"new_address\":\"Adress3333\",\n    \"new_name\":\"amit_ver2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/get_all_orders_by_manager?email=hili@example.com",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"get_all_orders_by_manager"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "hili@example.com"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add_item_to_cart",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \n\"email\": \"raz@example.com\",\n\"amount\": 1,\n\"object_type\": \"dining_table\",\n\"item\": {\n    \"color\": \"brown\",\n    \"table\": {\"material\": \"metal\"}\n    //\"chair\": {\"is_adjustable\": , \"has_armrest\": }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/add_item_to_cart",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"add_item_to_cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_user's_orders_history",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"amit@example.com\",\n    \"password\":\"password3\",\n    \"new_address\":\"Adress3333\",\n    \"new_name\":\"amit_ver2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/get_user's_orders_history?email=amit@example.com",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"get_user's_orders_history"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "amit@example.com"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit_user's_details",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"amit@example.com\",\n    \"new_address\":\"Adress3333\",\n    \"new_name\":\"amit_ver2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/edit_user's_details",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"edit_user's_details"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remove_item_from_cart",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \n\"email\": \"amit@example.com\",\n\"object_type\": \"dining_table\",\n\"item\": {\n    \"color\": \"brown\",\n    \"table\": {\"material\": \"wood\"}\n    //\"chair\": {\"is_adjustable\": , \"has_armrest\": }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/remove_item_from_cart",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"remove_item_from_cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "view_shoppingcart",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/view_shoppingcart?email=amit@example.com",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"view_shoppingcart"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "amit@example.com"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_furniture_info_by_price_range",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5005/get_furniture_info_by_price_range?max_price&min_price",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"get_furniture_info_by_price_range"
+					],
+					"query": [
+						{
+							"key": "max_price",
+							"value": null
+						},
+						{
+							"key": "min_price",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sign_in",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/sign_in?email=ido@example.com&password=password888",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"sign_in"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "ido@example.com"
+						},
+						{
+							"key": "password",
+							"value": "password888"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "secondary_manager_register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"existing_admin_email\":\"\",\n    \"name\": \"Ido\",\n    \"email\": \"ido@example.com\",\n    \"password\": \"password888\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/secondary_manager_register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"secondary_manager_register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "user_register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Ido\",\n    \"email\": \"ido@example.com\",\n    \"password\": \"password888\",\n    \"address\": \"Arlozorov 3, Tel Aviv\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/user_register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"user_register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update_amount_in_inventory",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"existing_admin_email\": \"\",\n\"quantity\": 25,\n\"sign\": 1,\n\"object_type\": \"work_chair\",\n\"item\": {\n    \"color\": \"white\",\n    //\"table\": {\"material\": \"wood\"}\n    \"chair\": {\"is_adjustable\":false , \"has_armrest\":false }\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/update_inventory",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"update_inventory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "checkout",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"raz@example.com\",\n    \"credit_card_num\":122567,\n    \"coupon_code\": \"OFFER50\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/checkout",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"checkout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get total price of cart",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5005/get_total_price?email=raz@example.com&coupon_code=none",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"get_total_price"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "raz@example.com"
+						},
+						{
+							"key": "coupon_code",
+							"value": "none",
+							"description": "Could be none"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete user by Manager",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"ban@example.com\",\n    \"email_to_delete\": \"ido@example.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/delete_user",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"delete_user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update password",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n    \"email\": \"ban@example.com\",\n    \"new_password\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/update_password",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"update_password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5005/get_user_info?email=ban@example.com",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"get_user_info"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "ban@example.com"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update order status",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"ban@example.com\",\n    \"order_id\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/update_order_status",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"update_order_status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "apply tax on user current cart",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"manager_email\": \"ban@example.com\",\n\"user_email\" : \"raz@example.com\",\n\"tax_rate\" : 15\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/apply_tax_on_user",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"apply_tax_on_user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add credit to user",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"manager_email\": \"ban@example.com\",\n\"user_email\" : \"raz@example.com\",\n\"credit\" : 1000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5005/add_credit_to_user",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5005",
+					"path": [
+						"add_credit_to_user"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
