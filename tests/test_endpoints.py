@@ -11,6 +11,9 @@ from app.models.Users import User, Manager
 def client():
     """
     Pytest fixture to create a test client for our Flask app.
+
+    Returns:
+        Flask test client: A test client for the Flask application.
     """
     with app.test_client() as test_client:
         yield test_client
@@ -20,6 +23,12 @@ def client():
 # Basic /
 # -----------------------------------------------------------------------------------
 def test_home_route(client):
+    """
+    Test that the home route responds with a 200 status code and expected welcome message.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     response = client.get("/")
     assert response.status_code == 200
     assert b"Hello, Welcome to our shop!" in response.data
@@ -32,8 +41,13 @@ def test_home_route(client):
 
 def test_update_inventory_by_manager_no_data(client):
     """
-    If the route does not handle 'no data' gracefully, it might KeyError => 500.
-    We send minimal JSON to ensure it returns 400 instead of KeyError => 500.
+    Test updating inventory when no data is provided.
+
+    Tests if the route handles 'no data' gracefully instead of returning a 500 error.
+    Expects a 400 status code with a specific error message.
+
+    Args:
+        client: The Flask test client fixture.
     """
     payload = {}
     response = client.put(
@@ -45,8 +59,12 @@ def test_update_inventory_by_manager_no_data(client):
 
 def test_update_inventory_by_manager_not_manager(client):
     """
-    A regular user tries updating inventory. Expect 400 with
-    'Only a logged-in administrator can update inventory'.
+    Test updating inventory when a regular user attempts to update inventory.
+
+    Expects a 400 status code with a message indicating only administrators can update inventory.
+
+    Args:
+        client: The Flask test client fixture.
     """
     user_email = "user@example.com"
     cache_store[user_email] = User(
@@ -72,6 +90,13 @@ def test_update_inventory_by_manager_not_manager(client):
 # -----------------------------------------------------------------------------------
 @patch("app.models.inventory.Inventory.get_information_by_price_range")
 def test_get_furniture_info_by_price_range_success(mock_get_info, client):
+    """
+    Test successful retrieval of furniture information by price range.
+
+    Args:
+        mock_get_info: Mock for the get_information_by_price_range method.
+        client: The Flask test client fixture.
+    """
     mock_get_info.return_value = [
         {"name": "Test Chair", "price": 150.0},
         {"name": "Test Table", "price": 120.0},
@@ -86,6 +111,13 @@ def test_get_furniture_info_by_price_range_success(mock_get_info, client):
 
 @patch("app.models.inventory.Inventory.get_information_by_price_range")
 def test_get_furniture_info_by_price_range_none_found(mock_get_info, client):
+    """
+    Test retrieving furniture by price range when no items are found.
+
+    Args:
+        mock_get_info: Mock for the get_information_by_price_range method.
+        client: The Flask test client fixture.
+    """
     mock_get_info.return_value = []
     response = client.get(
         "/get_furniture_info_by_price_range?min_price=100&max_price=200"
@@ -96,7 +128,12 @@ def test_get_furniture_info_by_price_range_none_found(mock_get_info, client):
 
 def test_get_furniture_info_by_price_range_error(client):
     """
-    If min_price or max_price aren't floats => 500
+    Test error handling when invalid price values are provided.
+
+    Tests if the endpoint handles non-float values for min_price and max_price by returning 500.
+
+    Args:
+        client: The Flask test client fixture.
     """
     response = client.get(
         "/get_furniture_info_by_price_range?min_price=abc&max_price=def"
@@ -109,6 +146,13 @@ def test_get_furniture_info_by_price_range_error(client):
 # -----------------------------------------------------------------------------------
 @patch("app.models.Users.Authentication.create_user")
 def test_user_register_success(mock_create_user, client):
+    """
+    Test successful user registration.
+
+    Args:
+        mock_create_user: Mock for the create_user method.
+        client: The Flask test client fixture.
+    """
     user_obj = User(
         name="TestUser",
         email="testuser@example.com",
@@ -134,6 +178,13 @@ def test_user_register_success(mock_create_user, client):
 
 @patch("app.models.Users.Authentication.create_user")
 def test_user_register_failure(mock_create_user, client):
+    """
+    Test user registration when creation fails.
+
+    Args:
+        mock_create_user: Mock for the create_user method.
+        client: The Flask test client fixture.
+    """
     mock_create_user.return_value = None
 
     payload = {
@@ -151,8 +202,12 @@ def test_user_register_failure(mock_create_user, client):
 
 def test_secondary_manager_register_no_manager(client):
     """
-    A normal user tries to register a new manager.
-    The code returns 400, not 500, because 'Only a logged-in administrator' can do it.
+    Test manager registration by a non-manager user.
+
+    Tests that a normal user cannot register a new manager and receives a 400 status code.
+
+    Args:
+        client: The Flask test client fixture.
     """
     user_email = "normaluser@example.com"
     cache_store[user_email] = User(
@@ -175,6 +230,13 @@ def test_secondary_manager_register_no_manager(client):
 
 @patch("app.api.endpoints.MAIN_MANAGER.add_manager")
 def test_secondary_manager_register_success(mock_add_manager, client):
+    """
+    Test successful secondary manager registration by an existing manager.
+
+    Args:
+        mock_add_manager: Mock for the add_manager method.
+        client: The Flask test client fixture.
+    """
     mock_new_mgr = Manager(
         name="NewManager", email="new_manager@example.com", password="password8"
     )
@@ -205,6 +267,13 @@ def test_secondary_manager_register_success(mock_add_manager, client):
 # -----------------------------------------------------------------------------------
 @patch("app.models.Users.Authentication.sign_in")
 def test_sign_in_success(mock_sign_in, client):
+    """
+    Test successful user sign-in.
+
+    Args:
+        mock_sign_in: Mock for the sign_in method.
+        client: The Flask test client fixture.
+    """
     mock_user = User(
         name="MockUser",
         email="mockuser@example.com",
@@ -221,16 +290,43 @@ def test_sign_in_success(mock_sign_in, client):
 
 @patch("app.models.Users.Authentication.sign_in")
 def test_sign_in_failure(mock_sign_in, client):
+    """
+    Test sign-in failure with invalid credentials.
+
+    Args:
+        mock_sign_in: Mock for the sign_in method.
+        client: The Flask test client fixture.
+    """
     mock_sign_in.return_value = None
     response = client.get("/sign_in?email=wrong@example.com&password=abc")
     assert response.status_code == 400
     assert b"Signing in failed" in response.data
 
 
+def test_sign_in_error(client):
+    """
+    Test error handling in the sign_in endpoint when required parameters are missing.
+
+    Args:
+        client: The Flask test client fixture.
+    """
+    # Cause an exception by not providing required parameters
+    response = client.get("/sign_in")  # Missing email and password
+    assert response.status_code == 500
+    response_data = json.loads(response.data)
+    assert "Error while signing in" in response_data["message"]
+
+
 # -----------------------------------------------------------------------------------
 # view_shoppingcart Tests
 # -----------------------------------------------------------------------------------
 def test_view_shoppingcart_manager(client):
+    """
+    Test that a manager cannot view a shopping cart.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     manager_email = "manager2@example.com"
     cache_store[manager_email] = Manager(
         name="Mgr2", email=manager_email, password="abcdefgh"
@@ -242,6 +338,12 @@ def test_view_shoppingcart_manager(client):
 
 
 def test_view_shoppingcart_empty(client):
+    """
+    Test viewing an empty shopping cart.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     user_email = "userx@example.com"
     user = User(
         name="UserX", email=user_email, password="12345678", address="UserX address"
@@ -258,6 +360,12 @@ def test_view_shoppingcart_empty(client):
 # edit_user's_details Tests
 # -----------------------------------------------------------------------------------
 def test_edit_users_details_no_updates(client):
+    """
+    Test editing user details with no updates provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     user_email = "someuser@example.com"
     cache_store[user_email] = User(
         name="SomeUser", email=user_email, password="12345678", address="Some address"
@@ -272,10 +380,52 @@ def test_edit_users_details_no_updates(client):
     assert b"No details were submitted for update." in response.data
 
 
+def test_edit_users_details_success(client):
+    """
+    Test successful user details update with new name and address.
+
+    Args:
+        client: The Flask test client fixture.
+    """
+    user_email = "test_user@example.com"
+    test_user = User(
+        name="Edit Test User",
+        email=user_email,
+        password="12345678",
+        address="Original Address",
+    )
+    # Mock update_user_details to avoid DB calls
+    test_user.update_user_details = MagicMock()
+    cache_store[user_email] = test_user
+
+    payload = {
+        "email": user_email,
+        "new_address": "New Address",
+        "new_name": "New Name",
+    }
+    response = client.put(
+        "/edit_user's_details",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+    assert response.status_code == 200
+    response_data = json.loads(response.data)
+    assert "successfully updated" in response_data["message"]
+    test_user.update_user_details.assert_called_once_with(
+        address="New Address", name="New Name"
+    )
+
+
 # -----------------------------------------------------------------------------------
 # get_user's_orders_history Tests
 # -----------------------------------------------------------------------------------
 def test_get_users_orders_history_disconnected(client):
+    """
+    Test retrieving order history for a disconnected user.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     user_email = "tempuser@example.com"
     cache_store[user_email] = None
     response = client.get(f"/get_user's_orders_history?email={user_email}")
@@ -287,6 +437,12 @@ def test_get_users_orders_history_disconnected(client):
 # get_all_orders_by_manager Tests
 # -----------------------------------------------------------------------------------
 def test_get_all_orders_by_manager_not_manager(client):
+    """
+    Test that a non-manager user cannot get all orders.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     user_email = "normal_user@example.com"
     cache_store[user_email] = User(
         name="NormalUser",
@@ -303,6 +459,12 @@ def test_get_all_orders_by_manager_not_manager(client):
 # add_item_to_cart Tests
 # -----------------------------------------------------------------------------------
 def test_add_item_to_cart_no_data(client):
+    """
+    Test adding an item to cart with no data provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.put(
         "/add_item_to_cart", data=json.dumps(payload), content_type="application/json"
@@ -312,6 +474,12 @@ def test_add_item_to_cart_no_data(client):
 
 
 def test_add_item_to_cart_not_user(client):
+    """
+    Test that a manager cannot add items to a cart.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     manager_email = "manager4@example.com"
     cache_store[manager_email] = Manager(
         name="Manager4", email=manager_email, password="mypassword"
@@ -335,6 +503,12 @@ def test_add_item_to_cart_not_user(client):
 # remove_item_from_cart Tests
 # -----------------------------------------------------------------------------------
 def test_remove_item_from_cart_no_data(client):
+    """
+    Test removing an item from cart with no data provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.delete(
         "/remove_item_from_cart",
@@ -346,6 +520,12 @@ def test_remove_item_from_cart_no_data(client):
 
 
 def test_remove_item_from_cart_not_user(client):
+    """
+    Test that a manager cannot remove items from a cart.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     manager_email = "manager5@example.com"
     cache_store[manager_email] = Manager(
         name="Manager5", email=manager_email, password="12345678"
@@ -368,6 +548,12 @@ def test_remove_item_from_cart_not_user(client):
 # checkout_endpoint Tests
 # -----------------------------------------------------------------------------------
 def test_checkout_no_data(client):
+    """
+    Test checkout with no data provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.post(
         "/checkout", data=json.dumps(payload), content_type="application/json"
@@ -376,10 +562,47 @@ def test_checkout_no_data(client):
     assert b"No data provided" in response.data
 
 
+def test_checkout_success(client):
+    """
+    Test successful checkout process with credit card and coupon code.
+
+    Args:
+        client: The Flask test client fixture.
+    """
+    user_email = "checkout@example.com"
+    test_user = User(
+        name="Checkout User",
+        email=user_email,
+        password="12345678",
+        address="Checkout Address",
+    )
+    test_user.checkout = MagicMock(return_value=(True, "Checkout successful!"))
+    cache_store[user_email] = test_user
+
+    payload = {
+        "email": user_email,
+        "credit_card_num": 4111111111111111,
+        "coupon_code": "SAVE10",
+    }
+    response = client.post(
+        "/checkout", data=json.dumps(payload), content_type="application/json"
+    )
+    assert response.status_code == 200
+    response_data = json.loads(response.data)
+    assert response_data["message"] == "Checkout successful!"
+    test_user.checkout.assert_called_once_with(4111111111111111, "SAVE10")
+
+
 # -----------------------------------------------------------------------------------
 # get_user_info Tests
 # -----------------------------------------------------------------------------------
 def test_get_user_info_not_found(client):
+    """
+    Test getting user info for a non-existent user.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     response = client.get("/get_user_info?email=unknown@example.com")
     assert response.status_code == 400
     assert b"User or Manager must be logged in." in response.data
@@ -389,6 +612,12 @@ def test_get_user_info_not_found(client):
 # delete_user Tests
 # -----------------------------------------------------------------------------------
 def test_delete_user_no_email(client):
+    """
+    Test deleting a user without providing an email.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.delete(
         "/delete_user", data=json.dumps(payload), content_type="application/json"
@@ -398,6 +627,12 @@ def test_delete_user_no_email(client):
 
 
 def test_delete_user_not_manager(client):
+    """
+    Test that a non-manager user cannot delete users.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     user_email = "test_user@example.com"
     cache_store[user_email] = User(
         name="TestUser", email=user_email, password="12345678", address="Test address"
@@ -414,6 +649,12 @@ def test_delete_user_not_manager(client):
 # update_password Tests
 # -----------------------------------------------------------------------------------
 def test_update_password_no_data(client):
+    """
+    Test updating password with no data provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.put(
         "/update_password", data=json.dumps(payload), content_type="application/json"
@@ -422,10 +663,43 @@ def test_update_password_no_data(client):
     assert b"Email and new password are required" in response.data
 
 
+def test_update_password_success(client):
+    """
+    Test successful password update.
+
+    Args:
+        client: The Flask test client fixture.
+    """
+    user_email = "password@example.com"
+    test_user = User(
+        name="Password User",
+        email=user_email,
+        password="12345678",
+        address="Password Address",
+    )
+    test_user.set_password = MagicMock()
+    cache_store[user_email] = test_user
+
+    payload = {"email": user_email, "new_password": "newpassword123"}
+    response = client.put(
+        "/update_password", data=json.dumps(payload), content_type="application/json"
+    )
+    assert response.status_code == 200
+    response_data = json.loads(response.data)
+    assert "Password updated successfully" in response_data["message"]
+    test_user.set_password.assert_called_once_with("newpassword123")
+
+
 # -----------------------------------------------------------------------------------
 # update_order_status Tests
 # -----------------------------------------------------------------------------------
 def test_update_order_status_no_data(client):
+    """
+    Test updating order status with no data provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.put(
         "/update_order_status",
@@ -437,6 +711,12 @@ def test_update_order_status_no_data(client):
 
 
 def test_update_order_status_not_manager(client):
+    """
+    Test that a non-manager user cannot update order status.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     user_email = "just_a_user@example.com"
     cache_store[user_email] = User(
         name="JustAUser", email=user_email, password="12345678", address="User address"
@@ -451,10 +731,42 @@ def test_update_order_status_not_manager(client):
     assert b"Only a manager can update order status." in response.data
 
 
+def test_update_order_status_success(client):
+    """
+    Test successful order status update by a manager.
+
+    Args:
+        client: The Flask test client fixture.
+    """
+    manager_email = "order_manager@example.com"
+    test_manager = Manager(
+        name="Order Manager", email=manager_email, password="12345678"
+    )
+    test_manager.update_order_status = MagicMock()
+    cache_store[manager_email] = test_manager
+
+    payload = {"email": manager_email, "order_id": 123}
+    response = client.put(
+        "/update_order_status",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+    assert response.status_code == 200
+    response_data = json.loads(response.data)
+    assert "status updated successfully" in response_data["message"]
+    test_manager.update_order_status.assert_called_once_with(123)
+
+
 # -----------------------------------------------------------------------------------
 # apply_tax_on_user Tests
 # -----------------------------------------------------------------------------------
 def test_apply_tax_on_user_no_data(client):
+    """
+    Test applying tax on user with no data provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.put(
         "/apply_tax_on_user", data=json.dumps(payload), content_type="application/json"
@@ -464,6 +776,12 @@ def test_apply_tax_on_user_no_data(client):
 
 
 def test_apply_tax_on_user_not_manager(client):
+    """
+    Test that a non-manager user cannot apply tax to a user's cart.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     user_email = "norm_user@example.com"
     cache_store[user_email] = User(
         name="NormUser", email=user_email, password="12345678", address="norm address"
@@ -480,10 +798,44 @@ def test_apply_tax_on_user_not_manager(client):
     assert b"Only a manager can apply tax to a user's cart." in response.data
 
 
+def test_apply_tax_on_user_success(client):
+    """
+    Test successful tax application by a manager to a user's cart.
+
+    Args:
+        client: The Flask test client fixture.
+    """
+    manager_email = "tax_manager@example.com"
+    test_manager = Manager(name="Tax Manager", email=manager_email, password="12345678")
+    cache_store[manager_email] = test_manager
+
+    user_email = "tax_user@example.com"
+    test_user = User(
+        name="Tax User", email=user_email, password="12345678", address="Tax Address"
+    )
+    test_user.cart.apply_tax_on_cart = MagicMock(return_value=True)
+    cache_store[user_email] = test_user
+
+    payload = {"manager_email": manager_email, "user_email": user_email, "tax_rate": 10}
+    response = client.put(
+        "/apply_tax_on_user", data=json.dumps(payload), content_type="application/json"
+    )
+    assert response.status_code == 200
+    response_data = json.loads(response.data)
+    assert "applied successfully" in response_data["message"]
+    test_user.cart.apply_tax_on_cart.assert_called_once_with(10)
+
+
 # -----------------------------------------------------------------------------------
 # add_credit_to_user Tests
 # -----------------------------------------------------------------------------------
 def test_add_credit_to_user_no_data(client):
+    """
+    Test adding credit to user with no data provided.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     payload = {}
     response = client.put(
         "/add_credit_to_user", data=json.dumps(payload), content_type="application/json"
@@ -494,6 +846,13 @@ def test_add_credit_to_user_no_data(client):
 
 @patch("app.models.Users.User.update_credit")
 def test_add_credit_to_user_success(mock_update_credit, client):
+    """
+    Test successful credit addition to a user by a manager.
+
+    Args:
+        mock_update_credit: Mock for the update_credit method.
+        client: The Flask test client fixture.
+    """
     manager_email = "mgr11@example.com"
     cache_store[manager_email] = Manager(
         name="Mgr11", email=manager_email, password="longpassword"
@@ -513,7 +872,12 @@ def test_add_credit_to_user_success(mock_update_credit, client):
 
 
 def test_get_furniture_info_by_price_range_no_results(client):
-    """Test retrieving furniture by price range with no results."""
+    """
+    Test retrieving furniture by price range when no items are found in the mocked inventory.
+
+    Args:
+        client: The Flask test client fixture.
+    """
     with patch("app.api.endpoints.Inventory") as mock_inventory:
         mock_inv_instance = MagicMock()
         mock_inventory.return_value = mock_inv_instance
