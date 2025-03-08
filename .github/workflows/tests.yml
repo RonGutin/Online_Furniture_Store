@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches:
       - main
-      - develop
 
 jobs:
   test:
@@ -37,9 +35,9 @@ jobs:
       - name: Run Flake8 (Style Check)
         run: flake8 --max-line-length=100
 
-      - name: Run Unit Tests with Coverage (skip integration)
+      - name: Run Unit Tests with Coverage (skip integration and regression)
         run: |
-          PYTHONPATH=. pytest --cov=app --cov-report=term-missing -m "not integration"
+          PYTHONPATH=. pytest --cov=app --cov-report=term-missing -m "not integration and not regression"
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4

@@ -318,7 +318,11 @@ class Authentication:
         Returns:
             bool: True if the credit card is valid, False otherwise
         """
-        if total_price is not None and isinstance(credit_card_num, int) and credit_card_num > 9999999:
+        if (
+            total_price is not None
+            and isinstance(credit_card_num, int)
+            and credit_card_num > 9999999
+        ):
             return True
         return False
 
