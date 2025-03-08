@@ -318,11 +318,7 @@ class Authentication:
         Returns:
             bool: True if the credit card is valid, False otherwise
         """
-        if not total_price:
-            return True
-        if isinstance(credit_card_num, int):
-            return True
-        if credit_card_num > 9999999:
+        if total_price is not None and isinstance(credit_card_num, int) and credit_card_num > 9999999:
             return True
         return False
 
@@ -632,6 +628,8 @@ class User(BasicUser):
             self.cart = ShoppingCart()
             self.update_credit(total_price // 10)
             return True, "Checkout successful!"
+        # except ValueError as ve:
+        #     return False, f"Error: {ve}"
         except Exception as e:
             return False, f"Error in checkout process: {e}"
 
