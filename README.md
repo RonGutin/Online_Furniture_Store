@@ -46,7 +46,7 @@ DATABASE_HOST = "localhost"
 DATABASE_PORT = "3306"
 DATABASE_NAME = "FinalProjectDB"
 ```
-![ERD](images/ERD.jpg "Our Entity Relationship Diagram - Describes all different DB's and relations between them")
+![ERD](images_and_pdfs/ERD.jpg "Our Entity Relationship Diagram - Describes all different DB's and relations between them")
 
 
 
@@ -93,6 +93,15 @@ Make sure that the application opens on `http://127.0.0.1:5005` for all endpoint
 For more endpoints and detailed request/response documentation, please refer to the **API Guide**.
 
 ---
+
+## Tests
+- Achieved 81% coverage of unittests.
+- Added multiple Integration and Regression tests.
+- Used GitHub workflows to run the tests automatically upon every push to main and a PR.
+- To run integration and regression tests make sure your MySQL is launched
+- All tests are located in /tests directory
+- To run tests use `pytest path_to/tests`
+
 
 ## Contact / Contributing
 If you have questions, feel free to open an issue or reach out to any of the group members.  

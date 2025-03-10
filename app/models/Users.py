@@ -560,7 +560,7 @@ class User(BasicUser):
         session = SessionLocal()  # Assuming SessionLocal is defined elsewhere
         try:
             orders_list = []
-            my_orders = OrdersDB.query.filter_by(UserEmail=self.email).all()
+            my_orders = session.query(OrdersDB).filter_by(UserEmail=self.email).all()
 
             if not my_orders:
                 return None  # Return None if no orders found
@@ -762,7 +762,7 @@ class Manager(BasicUser):
         session = SessionLocal()
         try:
             order_db = session.query(OrdersDB).filter(OrdersDB.id == order_id).first()
-            if order_db.Ostatus == OrderStatus.DELIVERED:
+            if order_db.Ostatus == OrderStatus.DELIVERED.value:
                 raise ValueError
             else:
                 order_db.Ostatus += 1

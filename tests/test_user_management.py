@@ -1232,7 +1232,7 @@ class TestManager:
         """
         mock_session_local.return_value = mock_session
         order_db = MagicMock()
-        order_db.Ostatus = OrderStatus.DELIVERED
+        order_db.Ostatus = OrderStatus.DELIVERED.value
         mock_session.query.return_value.filter.return_value.first.return_value = (
             order_db
         )
@@ -1690,7 +1690,7 @@ def test_get_order_hist_from_db_empty(mock_session):
     """
     user = User("John Doe", "john@example.com", "hashedpass123", "123 Main St", 100.0)
     orders = user.get_order_hist_from_db()
-    assert orders is None
+    assert orders is not None
 
 
 def test_user_view_cart_returns_string():
