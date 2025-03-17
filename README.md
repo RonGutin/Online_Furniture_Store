@@ -6,7 +6,6 @@
 - Raz Ifrach
 - Hili Atia
 - Ron Gutin
-- Amit Uzan
 
 ## Project Overview
 This project simulates an online furniture store, providing a full e-commerce experience:
