@@ -3,9 +3,9 @@
 # Online Furniture Store
 
 ## Group Members
+- Ron Gutin
 - Raz Ifrach
 - Hili Atia
-- Ron Gutin
 
 ## Project Overview
 This project simulates an online furniture store, providing a full e-commerce experience:
